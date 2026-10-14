@@ -24,8 +24,8 @@ vec2 rsi(vec3 r0, vec3 rd, float sr) {
   return vec2((-b - sqrt(d)) / (2.0 * a), (-b + sqrt(d)) / (2.0 * a));
 }
 vec3 atmosphere(vec3 r, vec3 r0, vec3 pSun) {
-  const int iSteps = 16;
-  const int jSteps = 8;
+  const int iSteps = 12;
+  const int jSteps = 6;
   const float rPlanet = ${R_PLANET.toFixed(1)};
   const float rAtmos = ${R_ATMOS.toFixed(1)};
   const vec3 kRlh = vec3(${K_RLH.map((v) => v.toExponential()).join(', ')});
@@ -365,7 +365,7 @@ vec4 renderClouds(vec3 ro, vec3 rd) {
       float ld = 0.0;
       float ls = 55.0;
       vec3 lp = p;
-      for (int j = 0; j < 5; j++) {
+      for (int j = 0; j < 4; j++) {
         lp += uLightDir * ls;
         ld += cloudDensity(lp, true) * ls;
         ls *= 1.7;
@@ -425,6 +425,90 @@ void main() {
 }
 `;
 
+
+// Stiliserad himmel: fejkade effekter för webbläsaren. Färgerna för zenit, horisont och sol
+// kommer från den fysikaliska modellen som körs på CPU:n en gång per bildruta, men per pixel
+// görs bara en gradient, en solglöd och ett 2D-molnlager med falsk självskuggning.
+const stylizedFragment = /* glsl */ `
+precision highp sampler3D;
+uniform vec3 uSunDir;
+uniform vec3 uSunTrans;
+uniform vec3 uLightDir;
+uniform vec3 uLightColor;
+uniform vec3 uSkyAmbient;
+uniform vec3 uHorizon;
+uniform float uNight;
+uniform float uStorm;
+uniform float uFlash;
+uniform float uCoverage;
+uniform float uCloudDensity;
+uniform float uCloudSpeed;
+uniform float uCloudsOn;
+uniform float uTime;
+uniform vec2 uWindDir;
+uniform sampler3D uNoise;
+varying vec3 vDir;
+${noiseGLSL}
+
+float cloudField(vec2 uv, float z) {
+  return textureLod(uNoise, vec3(uv, z), 0.0).r * 0.65 + textureLod(uNoise, vec3(uv * 3.1, z * 1.7 + 0.3), 0.0).g * 0.35;
+}
+
+void main() {
+  vec3 rd = normalize(vDir);
+  float up = max(rd.y, 0.0);
+  float day = smoothstep(-0.1, 0.1, uSunDir.y);
+  float sd = max(dot(rd, uSunDir), 0.0);
+
+  vec3 sky = mix(uHorizon, uSkyAmbient, pow(up, 0.5));
+  sky += uSunTrans * (pow(sd, 6.0) * 0.35 + pow(sd, 48.0) * 0.8) * day;
+  sky += uSunTrans * pow(1.0 - up, 6.0) * sd * sd * 0.4 * day;
+
+  if (uNight > 0.01) {
+    vec3 sp = rd * 260.0;
+    vec3 cell = floor(sp);
+    vec3 f = fract(sp) - 0.5;
+    float h = hash13(cell);
+    float star = step(0.9965, h) * smoothstep(0.14, 0.0, length(f));
+    float tw = 0.6 + 0.4 * sin(uTime * 3.0 + h * 100.0);
+    sky += vec3(0.9, 0.95, 1.0) * star * tw * 4.0 * uNight * smoothstep(0.0, 0.15, rd.y);
+    float md = dot(rd, -uSunDir);
+    float moon = smoothstep(0.99935, 0.99955, md);
+    sky += vec3(1.0, 0.97, 0.9) * moon * 3.0 * uNight;
+    sky += vec3(0.15, 0.2, 0.32) * pow(max(md, 0.0), 300.0) * uNight;
+  }
+  sky += uSunTrans * smoothstep(0.99955, 0.99975, dot(rd, uSunDir)) * 80.0 * (1.0 - uStorm);
+
+  float lum = dot(sky, vec3(0.3, 0.5, 0.2));
+  sky = mix(sky, vec3(lum) * vec3(0.55, 0.6, 0.68), uStorm * 0.85);
+  sky = mix(sky, uHorizon, smoothstep(0.03, -0.05, rd.y));
+
+  if (uCloudsOn > 0.5 && rd.y > 0.0) {
+    // Projicera på ett plan; +0.12 plattar till nära horisonten i stället för att gå mot oändligheten.
+    vec2 p = rd.xz / (rd.y + 0.12);
+    vec2 uv = p * 0.09 + uWindDir * uTime * uCloudSpeed * 0.00025;
+    float z = uTime * 0.003;
+    float n = cloudField(uv, z);
+    float d = clamp(smoothstep(0.95 - uCoverage, 1.3 - uCoverage, n) * uCloudDensity, 0.0, 1.0);
+    if (d > 0.0) {
+      // Falsk självskuggning: tätare åt ljuset = mörkare sida.
+      vec2 toL = normalize(uLightDir.xz + 1e-4) * 0.03;
+      float lit = clamp(0.55 + (n - cloudField(uv + toL, z)) * 4.0, 0.0, 1.0);
+      vec3 shade = uSkyAmbient * 1.4 + uHorizon * 0.3;
+      vec3 bright = uLightColor * 1.6 + uSkyAmbient * 0.8;
+      vec3 cloud = mix(shade, bright, lit);
+      cloud += uLightColor * pow(sd, 10.0) * (1.0 - d) * 2.0;
+      cloud = mix(cloud, vec3(dot(cloud, vec3(0.33))) * 0.6, uStorm * 0.7);
+      cloud = mix(uHorizon, cloud, smoothstep(0.0, 0.25, rd.y));
+      cloud += uFlash * vec3(1.5, 1.6, 2.0) * d;
+      sky = mix(sky, cloud, d * smoothstep(0.0, 0.12, rd.y));
+    }
+  }
+  sky += uFlash * vec3(0.55, 0.6, 0.8) * 1.2 * smoothstep(-0.1, 0.4, rd.y);
+  gl_FragColor = vec4(sky, 1.0);
+}
+`;
+
 export function createSky(globals) {
   const noise = createCloudNoise(64);
   const uniforms = {
@@ -440,7 +524,7 @@ export function createSky(globals) {
     uCoverage: { value: 0.42 },
     uCloudDensity: { value: 0.9 },
     uCloudSpeed: { value: 12 },
-    uCloudSteps: { value: 56 },
+    uCloudSteps: { value: 48 },
     uCloudsOn: { value: 1 },
     uTime: globals.uTime,
     uWindDir: globals.uWindDir,
@@ -456,14 +540,63 @@ export function createSky(globals) {
   });
   material.name = 'himmel och moln';
   const geo = new THREE.SphereGeometry(4000, 48, 24);
-  const mesh = new THREE.Mesh(geo, material);
+
+  // Atmosfär och moln är dyra per pixel, så de renderas i lägre upplösning till en egen
+  // textur. I huvudscenen ritar en billig kupol bara upp texturen bakom allt annat.
+  const heavyMesh = new THREE.Mesh(geo, material);
+  heavyMesh.frustumCulled = false;
+  const skyScene = new THREE.Scene();
+  skyScene.add(heavyMesh);
+  const skyRT = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, depthBuffer: false });
+  const compositeMat = new THREE.ShaderMaterial({
+    name: 'himmel',
+    uniforms: { tSky: { value: skyRT.texture }, uResolution: { value: new THREE.Vector2(1, 1) } },
+    vertexShader: skyVertex,
+    fragmentShader: /* glsl */ `
+      uniform sampler2D tSky;
+      uniform vec2 uResolution;
+      varying vec3 vDir;
+      void main() {
+        gl_FragColor = texture2D(tSky, gl_FragCoord.xy / uResolution);
+      }`,
+    side: THREE.BackSide,
+    depthWrite: false,
+    fog: false,
+  });
+  const styleMat = new THREE.ShaderMaterial({
+    name: 'himmel (stiliserad)',
+    uniforms,
+    vertexShader: skyVertex,
+    fragmentShader: stylizedFragment,
+    side: THREE.BackSide,
+    depthWrite: false,
+    fog: false,
+  });
+  const mesh = new THREE.Mesh(geo, styleMat);
   mesh.frustumCulled = false;
   mesh.renderOrder = -10;
+  const quality = { scale: 0.5 };
+  const bufferSize = new THREE.Vector2(1, 1);
+  function setSize(w, h) {
+    bufferSize.set(w, h);
+    compositeMat.uniforms.uResolution.value.set(w, h);
+    skyRT.setSize(Math.max(1, Math.floor(w * quality.scale)), Math.max(1, Math.floor(h * quality.scale)));
+  }
+  // 'stylized' (standard, billig) eller 'physical' (raymarchad atmosfär och volymetriska moln).
+  const mode = { value: 'stylized' };
+  function render(renderer, camera) {
+    if (mode.value !== 'physical') return;
+    heavyMesh.position.copy(camera.position);
+    const prev = renderer.getRenderTarget();
+    renderer.setRenderTarget(skyRT);
+    renderer.render(skyScene, camera);
+    renderer.setRenderTarget(prev);
+  }
 
   // Separat himmel för reflektioner/IBL: färre molnsteg, renderas i en cubemap.
   const envMaterial = material.clone();
   envMaterial.uniforms = { ...uniforms, uCloudSteps: { value: 20 } };
-  const envMesh = new THREE.Mesh(geo, envMaterial);
+  const envMesh = new THREE.Mesh(geo, styleMat);
   envMesh.frustumCulled = false;
   const envScene = new THREE.Scene();
   envScene.add(envMesh);
@@ -483,5 +616,22 @@ export function createSky(globals) {
     envRT = next;
   }
 
-  return { mesh, uniforms, envCube: cubeRT.texture, updateEnvironment };
+  function setMode(m) {
+    mode.value = m;
+    mesh.material = m === 'physical' ? compositeMat : styleMat;
+    envMesh.material = m === 'physical' ? envMaterial : styleMat;
+  }
+
+  return {
+    mesh,
+    uniforms,
+    quality,
+    mode,
+    setMode,
+    envCube: cubeRT.texture,
+    updateEnvironment,
+    setSize,
+    resize: () => setSize(bufferSize.x, bufferSize.y),
+    render,
+  };
 }
