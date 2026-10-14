@@ -8,7 +8,7 @@ let cacheKey = 0;
 
 // Vind + genomlysning (SSS) på MeshStandardMaterial. Returnerar ett matchande skuggmaterial
 // så att skuggorna rör sig med vinden.
-function patchFoliage(material, globals, { sway = 0.3, sss = 0.6 } = {}) {
+export function patchFoliage(material, globals, { sway = 0.3, sss = 0.6 } = {}) {
   const key = `foliage-${cacheKey++}`;
   const vertexPars = `${windGLSL}
     uniform float uSway;
@@ -137,7 +137,7 @@ function blob(radius, detail, seed, center) {
   return g;
 }
 
-function buildBroadleaf(rng, leaf) {
+export function buildBroadleaf(rng, leaf) {
   const H = 3.4 + rng() * 1.4;
   const total = H + 3.2;
   const parts = [];
@@ -176,7 +176,7 @@ function buildBroadleaf(rng, leaf) {
   return mergeGeometries(parts);
 }
 
-function buildPalm(rng) {
+export function buildPalm(rng) {
   const H = 6 + rng() * 2.5;
   const lean = 1.2 + rng() * 1.2;
   const segs = 10;
@@ -240,7 +240,7 @@ function buildPalm(rng) {
   return mergeGeometries(parts);
 }
 
-function buildConifer(rng) {
+export function buildConifer(rng) {
   const parts = [];
   const tiers = 4 + Math.floor(rng() * 2);
   const total = 1.4 + tiers * 1.15 + 2.4;
@@ -268,7 +268,7 @@ function buildConifer(rng) {
   return mergeGeometries(parts);
 }
 
-function buildBush(rng, flowers) {
+export function buildBush(rng, flowers) {
   const parts = [];
   const C = new THREE.Vector3(0, 0.45, 0);
   const leaf = srgb(new THREE.Color(), 0.3, 0.55, 0.2);
@@ -296,7 +296,7 @@ function buildBush(rng, flowers) {
   return mergeGeometries(parts);
 }
 
-function buildRock(rng) {
+export function buildRock(rng) {
   const g = new THREE.IcosahedronGeometry(1, 1);
   const pos = g.attributes.position;
   const p = new THREE.Vector3();

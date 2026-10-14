@@ -103,7 +103,8 @@ body {
   border-color: var(--signal);
 }
 
-#island-link {
+#island-link,
+.tool-link {
   justify-self: start;
   padding: 6px 10px;
   border: 1px solid var(--signal);
@@ -114,7 +115,9 @@ body {
 }
 
 #island-link:hover,
-#island-link:focus-visible {
+#island-link:focus-visible,
+.tool-link:hover,
+.tool-link:focus-visible {
   background: var(--signal);
   color: var(--ground);
 }

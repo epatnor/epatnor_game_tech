@@ -2,3 +2,8 @@ node_modules/
 dist/
 .DS_Store
 screenshots/
+# Originalarkiv från tillgångskällor hålls utanför git (se INTEGRATION_NOTES.md).
+assets/source/*
+!assets/source/README.md
+# Genereras av scripts/copy-decoders.mjs
+public/decoders/

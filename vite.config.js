@@ -6,10 +6,13 @@ export default defineConfig({
   base: './',
   build: {
     chunkSizeWarningLimit: 1200,
+    // Byggets JS/CSS i static/ så att det inte blandas med public/assets/ (tillgångarna).
+    assetsDir: 'static',
     rollupOptions: {
       input: {
         main: resolve(import.meta.dirname, 'index.html'),
         island: resolve(import.meta.dirname, 'island/index.html'),
+        gallery: resolve(import.meta.dirname, 'gallery/index.html'),
       },
     },
   },
