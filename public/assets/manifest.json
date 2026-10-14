@@ -3,5 +3,158 @@
   "note": "Runtime-manifest för importerade tillgångar. Se ASSET_CATALOG.md och INTEGRATION_NOTES.md. Varje modell kräver verifierad licens innan den läggs till här.",
   "models": [],
   "textures": [],
-  "characters": []
+  "characters": [
+    {
+      "id": "kaykit-skeleton-warrior",
+      "name": "Skelettkrigare",
+      "category": "KayKit Skeletons",
+      "file": "characters/kaykit-skeletons/Skeleton_Warrior.glb",
+      "defaultWeapon": "Blade",
+      "defaultOffhand": "Shield_Large_A",
+      "intendedUse": "Fiender och testkaraktär",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-skeletons",
+      "license": "CC0 1.0 (License.txt i KayKit_Skeletons_1.1_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "GLB/glTF",
+      "convertedFormat": "oförändrad GLB/glTF",
+      "rig": "Rig_Medium",
+      "animations": [
+        "characters/kaykit-skeletons/Rig_Medium_General.glb",
+        "characters/kaykit-skeletons/Rig_Medium_MovementBasic.glb"
+      ],
+      "clipMap": {
+        "attack": "Throw",
+        "spellcast": "Use_Item"
+      },
+      "substitutes": [
+        "attack",
+        "spellcast"
+      ],
+      "weapons": {
+        "Blade": "characters/kaykit-skeletons/weapons/Skeleton_Blade.gltf",
+        "Axe": "characters/kaykit-skeletons/weapons/Skeleton_Axe.gltf",
+        "Staff": "characters/kaykit-skeletons/weapons/Skeleton_Staff.gltf",
+        "Crossbow": "characters/kaykit-skeletons/weapons/Skeleton_Crossbow.gltf"
+      },
+      "offhand": {
+        "Shield_Large_A": "characters/kaykit-skeletons/weapons/Skeleton_Shield_Large_A.gltf",
+        "Shield_Small_A": "characters/kaykit-skeletons/weapons/Skeleton_Shield_Small_A.gltf"
+      }
+    },
+    {
+      "id": "kaykit-skeleton-mage",
+      "name": "Skelettmagiker",
+      "category": "KayKit Skeletons",
+      "file": "characters/kaykit-skeletons/Skeleton_Mage.glb",
+      "defaultWeapon": "Staff",
+      "defaultOffhand": null,
+      "intendedUse": "Fiender och testkaraktär",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-skeletons",
+      "license": "CC0 1.0 (License.txt i KayKit_Skeletons_1.1_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "GLB/glTF",
+      "convertedFormat": "oförändrad GLB/glTF",
+      "rig": "Rig_Medium",
+      "animations": [
+        "characters/kaykit-skeletons/Rig_Medium_General.glb",
+        "characters/kaykit-skeletons/Rig_Medium_MovementBasic.glb"
+      ],
+      "clipMap": {
+        "attack": "Throw",
+        "spellcast": "Use_Item"
+      },
+      "substitutes": [
+        "attack",
+        "spellcast"
+      ],
+      "weapons": {
+        "Blade": "characters/kaykit-skeletons/weapons/Skeleton_Blade.gltf",
+        "Axe": "characters/kaykit-skeletons/weapons/Skeleton_Axe.gltf",
+        "Staff": "characters/kaykit-skeletons/weapons/Skeleton_Staff.gltf",
+        "Crossbow": "characters/kaykit-skeletons/weapons/Skeleton_Crossbow.gltf"
+      },
+      "offhand": {
+        "Shield_Large_A": "characters/kaykit-skeletons/weapons/Skeleton_Shield_Large_A.gltf",
+        "Shield_Small_A": "characters/kaykit-skeletons/weapons/Skeleton_Shield_Small_A.gltf"
+      }
+    },
+    {
+      "id": "kaykit-skeleton-rogue",
+      "name": "Skelettrogue",
+      "category": "KayKit Skeletons",
+      "file": "characters/kaykit-skeletons/Skeleton_Rogue.glb",
+      "defaultWeapon": "Crossbow",
+      "defaultOffhand": null,
+      "intendedUse": "Fiender och testkaraktär",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-skeletons",
+      "license": "CC0 1.0 (License.txt i KayKit_Skeletons_1.1_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "GLB/glTF",
+      "convertedFormat": "oförändrad GLB/glTF",
+      "rig": "Rig_Medium",
+      "animations": [
+        "characters/kaykit-skeletons/Rig_Medium_General.glb",
+        "characters/kaykit-skeletons/Rig_Medium_MovementBasic.glb"
+      ],
+      "clipMap": {
+        "attack": "Throw",
+        "spellcast": "Use_Item"
+      },
+      "substitutes": [
+        "attack",
+        "spellcast"
+      ],
+      "weapons": {
+        "Blade": "characters/kaykit-skeletons/weapons/Skeleton_Blade.gltf",
+        "Axe": "characters/kaykit-skeletons/weapons/Skeleton_Axe.gltf",
+        "Staff": "characters/kaykit-skeletons/weapons/Skeleton_Staff.gltf",
+        "Crossbow": "characters/kaykit-skeletons/weapons/Skeleton_Crossbow.gltf"
+      },
+      "offhand": {
+        "Shield_Large_A": "characters/kaykit-skeletons/weapons/Skeleton_Shield_Large_A.gltf",
+        "Shield_Small_A": "characters/kaykit-skeletons/weapons/Skeleton_Shield_Small_A.gltf"
+      }
+    },
+    {
+      "id": "kaykit-skeleton-minion",
+      "name": "Skelettsoldat",
+      "category": "KayKit Skeletons",
+      "file": "characters/kaykit-skeletons/Skeleton_Minion.glb",
+      "defaultWeapon": "Axe",
+      "defaultOffhand": "Shield_Small_A",
+      "intendedUse": "Fiender och testkaraktär",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-skeletons",
+      "license": "CC0 1.0 (License.txt i KayKit_Skeletons_1.1_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "GLB/glTF",
+      "convertedFormat": "oförändrad GLB/glTF",
+      "rig": "Rig_Medium",
+      "animations": [
+        "characters/kaykit-skeletons/Rig_Medium_General.glb",
+        "characters/kaykit-skeletons/Rig_Medium_MovementBasic.glb"
+      ],
+      "clipMap": {
+        "attack": "Throw",
+        "spellcast": "Use_Item"
+      },
+      "substitutes": [
+        "attack",
+        "spellcast"
+      ],
+      "weapons": {
+        "Blade": "characters/kaykit-skeletons/weapons/Skeleton_Blade.gltf",
+        "Axe": "characters/kaykit-skeletons/weapons/Skeleton_Axe.gltf",
+        "Staff": "characters/kaykit-skeletons/weapons/Skeleton_Staff.gltf",
+        "Crossbow": "characters/kaykit-skeletons/weapons/Skeleton_Crossbow.gltf"
+      },
+      "offhand": {
+        "Shield_Large_A": "characters/kaykit-skeletons/weapons/Skeleton_Shield_Large_A.gltf",
+        "Shield_Small_A": "characters/kaykit-skeletons/weapons/Skeleton_Shield_Small_A.gltf"
+      }
+    }
+  ]
 }

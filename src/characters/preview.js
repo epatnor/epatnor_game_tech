@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
+import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 import '../gallery/gallery.css';
 import './preview.css';
 import { createAssetLoader, modelStats } from '../assets/loader.js';
@@ -60,9 +61,33 @@ scene.add(ground);
 // --- Karaktärer ------------------------------------------------------------------------------
 
 const PRESETS = {
-  Krigare: { palette: PALETTES.Krigare, hair: 'Kort', weapon: 'Svärd', offhand: true, head: 'Inget', cape: false, pauldrons: true },
-  Magiker: { palette: PALETTES.Magiker, hair: 'Långt', weapon: 'Stav', offhand: false, head: 'Trollkarlshatt', cape: true, pauldrons: false },
-  Jägare: { palette: PALETTES.Jägare, hair: 'Hästsvans', weapon: 'Yxa', offhand: false, head: 'Inget', cape: true, pauldrons: false },
+  Krigare: {
+    palette: PALETTES.Krigare,
+    hair: 'Kort',
+    weapon: 'Svärd',
+    offhand: true,
+    head: 'Inget',
+    cape: false,
+    pauldrons: true,
+  },
+  Magiker: {
+    palette: PALETTES.Magiker,
+    hair: 'Långt',
+    weapon: 'Stav',
+    offhand: false,
+    head: 'Trollkarlshatt',
+    cape: true,
+    pauldrons: false,
+  },
+  Jägare: {
+    palette: PALETTES.Jägare,
+    hair: 'Hästsvans',
+    weapon: 'Yxa',
+    offhand: false,
+    head: 'Inget',
+    cape: true,
+    pauldrons: false,
+  },
   'Jätte (retargetad)': {
     palette: { ...PALETTES.Krigare, tunic: 0x6b5b3e, pants: 0x3e3326, skin: 0x8fae7a, hair: 0x2a2a2a },
     hair: 'Ingen',
@@ -83,6 +108,38 @@ const WEAPON_OFFSET = {
 };
 
 const loader = createAssetLoader(renderer);
+// Importerade karaktärer från manifestet (namn -> post) och en cache för laddade glTF-filer.
+const imported = {};
+const gltfCache = new Map();
+const loadGltf = (file) => {
+  if (!gltfCache.has(file)) gltfCache.set(file, loader.gltf.loadAsync(loader.url(file)));
+  return gltfCache.get(file);
+};
+
+async function loadImported(entry) {
+  const [main, ...anims] = await Promise.all([loadGltf(entry.file), ...(entry.animations ?? []).map(loadGltf)]);
+  // SkeletonUtils.clone klonar skinnade mesher korrekt (Object3D.clone delar skelettet).
+  const root = SkeletonUtils.clone(main.scene);
+  const clips = [];
+  const seen = new Set();
+  for (const g of [main, ...anims]) {
+    for (const clip of g.animations) {
+      if (seen.has(clip.name)) continue;
+      seen.add(clip.name);
+      clips.push(clip);
+    }
+  }
+  return { root, clips };
+}
+
+async function loadProp(file) {
+  const g = await loadGltf(file);
+  const obj = g.scene.clone(true);
+  obj.traverse((o) => {
+    if (o.isMesh) o.castShadow = true;
+  });
+  return obj;
+}
 const exporter = new GLTFExporter();
 const sourceClips = buildClips();
 let sourceHero = null; // referens för retargeting
@@ -106,7 +163,16 @@ function makeCharacter(preset) {
   }
   // Jätten har Mixamo-liknande bennamn och andra proportioner. Klippen retargetas från
   // standardskelettet med SkeletonUtils.retargetClip i stället för att byggas om.
-  const proportions = { Spine: 1.15, Chest: 1.15, UpperLeg_L: 1.2, UpperLeg_R: 1.2, LowerLeg_L: 1.25, LowerLeg_R: 1.25, Foot_L: 1.25, Foot_R: 1.25 };
+  const proportions = {
+    Spine: 1.15,
+    Chest: 1.15,
+    UpperLeg_L: 1.2,
+    UpperLeg_R: 1.2,
+    LowerLeg_L: 1.25,
+    LowerLeg_R: 1.25,
+    Foot_L: 1.25,
+    Foot_R: 1.25,
+  };
   const scaledHip = 0.95 * 1.25;
   proportions.Hips = scaledHip / 0.95;
   const character = buildCharacter({ palette: p.palette, names: MIXAMO_NAMES, proportions, bulk: 1.35 });
@@ -120,8 +186,22 @@ function makeCharacter(preset) {
   return { character, clips };
 }
 
+async function equipImported() {
+  const c = char.controller;
+  const { entry } = char;
+  const e = state.equip;
+  c.attach('weapon', e.weapon && e.weapon !== 'Inget' ? await loadProp(entry.weapons[e.weapon]) : null, 'handR');
+  c.attach('offhand', e.offhand && e.offhand !== 'Ingen' ? await loadProp(entry.offhand[e.offhand]) : null, 'handL');
+  // Modellens egna delar (hjälm, mantel, käke …) kan slås av och på.
+  char.root.traverse((o) => {
+    if (o.isMesh && o.name in state.parts) o.visible = state.parts[o.name];
+  });
+  refreshInfo();
+}
+
 function equip() {
   if (!char) return;
+  if (char.entry) return equipImported();
   const c = char.controller;
   const e = state.equip;
   c.attach('weapon', e.weapon !== 'Inget' ? WEAPONS[e.weapon]() : null, 'handR', WEAPON_OFFSET[e.weapon]);
@@ -146,6 +226,35 @@ async function load() {
     skeletonHelper = null;
   }
   info.innerHTML = '<p>Bygger…</p>';
+  const entry = imported[state.preset];
+  if (entry) {
+    const { root, clips } = await loadImported(entry);
+    const controller = new CharacterController(root, clips, { fade: state.fade ?? 0.25, clipMap: entry.clipMap });
+    controller.timeScale = state.timeScale ?? 1;
+    root.traverse((o) => {
+      if (o.isMesh) {
+        o.castShadow = true;
+        o.receiveShadow = true;
+        o.frustumCulled = false;
+      }
+    });
+    scene.add(root);
+    char = { root, controller, character: null, clips, entry };
+    state.parts = {};
+    root.traverse((o) => {
+      if (o.isMesh && !/body$/i.test(o.name)) state.parts[o.name] = true;
+    });
+    if (state.skeleton) {
+      skeletonHelper = new THREE.SkeletonHelper(root);
+      scene.add(skeletonHelper);
+    }
+    await equip();
+    controller.setSpeed(state.speed);
+    const box = new THREE.Box3().setFromObject(root);
+    controls.target.set(0, (box.max.y + box.min.y) / 2, 0);
+    renderPanel();
+    return;
+  }
   const { character, clips } = makeCharacter(state.preset);
   let root = character.root;
   let usedClips = clips;
@@ -251,11 +360,14 @@ function renderPanel() {
     fieldset(
       'Karaktär',
       chips(
-        Object.keys(PRESETS).map((k) => [k, k]),
+        [...Object.keys(imported), ...Object.keys(PRESETS)].map((k) => [k, k]),
         (k) => k === state.preset,
         (k) => {
           state.preset = k;
-          state.equip = { ...PRESETS[k] };
+          const ent = imported[k];
+          state.equip = ent
+            ? { weapon: ent.defaultWeapon ?? 'Inget', offhand: ent.defaultOffhand ?? 'Ingen' }
+            : { ...PRESETS[k] };
           load();
         },
       ),
@@ -263,7 +375,7 @@ function renderPanel() {
     fieldset(
       'Animation',
       chips(
-        ANIMS,
+        ANIMS.map(([k, l]) => [k, char?.entry?.substitutes?.includes(k) ? `${l}*` : l]),
         (k) => c && c.current === c.actions[k],
         (k) => {
           if (k === 'death') c.die();
@@ -280,52 +392,57 @@ function renderPanel() {
         },
         (k) => !c?.actions[k],
       ),
-      slider('speed', 'Rörelse', 0, 6, 0.1, state.speed, (v) => `${v.toFixed(1)} m/s`, (v) => {
-        state.speed = v;
-        c.setSpeed(v);
-      }),
-      slider('timescale', 'Uppspelning', 0.1, 2, 0.05, state.timeScale ?? 1, (v) => `${v.toFixed(2)}×`, (v) => {
-        state.timeScale = v;
-        c.timeScale = v;
-      }),
-      slider('fade', 'Övertoning', 0, 1, 0.05, state.fade ?? 0.25, (v) => `${v.toFixed(2)} s`, (v) => {
-        state.fade = v;
-        c.fade = v;
-      }),
+      slider(
+        'speed',
+        'Rörelse',
+        0,
+        6,
+        0.1,
+        state.speed,
+        (v) => `${v.toFixed(1)} m/s`,
+        (v) => {
+          state.speed = v;
+          c.setSpeed(v);
+        },
+      ),
+      slider(
+        'timescale',
+        'Uppspelning',
+        0.1,
+        2,
+        0.05,
+        state.timeScale ?? 1,
+        (v) => `${v.toFixed(2)}×`,
+        (v) => {
+          state.timeScale = v;
+          c.timeScale = v;
+        },
+      ),
+      slider(
+        'fade',
+        'Övertoning',
+        0,
+        1,
+        0.05,
+        state.fade ?? 0.25,
+        (v) => `${v.toFixed(2)} s`,
+        (v) => {
+          state.fade = v;
+          c.fade = v;
+        },
+      ),
     ),
-    fieldset(
-      'Utrustning',
-      select('weapon', 'Vapen', ['Inget', ...Object.keys(WEAPONS)], state.equip.weapon, (v) => {
-        state.equip.weapon = v;
-        equip();
-      }),
-      checkbox('offhand', 'Sköld', state.equip.offhand, (v) => {
-        state.equip.offhand = v;
-        equip();
-      }),
-      select('head', 'Huvud', ['Inget', ...Object.keys(HEADGEAR)], state.equip.head, (v) => {
-        state.equip.head = v;
-        equip();
-      }),
-      select('hair', 'Frisyr', ['Ingen', 'Kort', 'Hästsvans', 'Långt'], state.equip.hair, (v) => {
-        state.equip.hair = v;
-        equip();
-      }),
-      checkbox('cape', 'Mantel', state.equip.cape, (v) => {
-        state.equip.cape = v;
-        equip();
-      }),
-      checkbox('pauldrons', 'Axelskydd', state.equip.pauldrons, (v) => {
-        state.equip.pauldrons = v;
-        equip();
-      }),
-    ),
+    char?.entry ? importedEquipment() : proceduralEquipment(),
     fieldset(
       'Visning',
-      select('source', 'Källa', ['procedurell', 'GLB-rundtur'], state.source, (v) => {
-        state.source = v;
-        load();
-      }),
+      ...(char?.entry
+        ? []
+        : [
+            select('source', 'Källa', ['procedurell', 'GLB-rundtur'], state.source, (v) => {
+              state.source = v;
+              load();
+            }),
+          ]),
       checkbox('skeleton', 'Skelett', state.skeleton, (v) => {
         state.skeleton = v;
         if (v && char && !skeletonHelper) {
@@ -341,13 +458,70 @@ function renderPanel() {
   refreshInfo();
 }
 
+function importedEquipment() {
+  const { entry } = char;
+  const prefix = entry.file.split('/').pop().replace('.glb', '_');
+  return fieldset(
+    'Utrustning',
+    select('weapon', 'Vapen', ['Inget', ...Object.keys(entry.weapons ?? {})], state.equip.weapon, (v) => {
+      state.equip.weapon = v;
+      equip();
+    }),
+    select('offhand', 'Vänster hand', ['Ingen', ...Object.keys(entry.offhand ?? {})], state.equip.offhand, (v) => {
+      state.equip.offhand = v;
+      equip();
+    }),
+    ...Object.keys(state.parts).map((name, i) =>
+      checkbox(`part-${i}`, name.replace(prefix, ''), state.parts[name], (v) => {
+        state.parts[name] = v;
+        equip();
+      }),
+    ),
+  );
+}
+
+function proceduralEquipment() {
+  return fieldset(
+    'Utrustning',
+    select('weapon', 'Vapen', ['Inget', ...Object.keys(WEAPONS)], state.equip.weapon, (v) => {
+      state.equip.weapon = v;
+      equip();
+    }),
+    checkbox('offhand', 'Sköld', state.equip.offhand, (v) => {
+      state.equip.offhand = v;
+      equip();
+    }),
+    select('head', 'Huvud', ['Inget', ...Object.keys(HEADGEAR)], state.equip.head, (v) => {
+      state.equip.head = v;
+      equip();
+    }),
+    select('hair', 'Frisyr', ['Ingen', 'Kort', 'Hästsvans', 'Långt'], state.equip.hair, (v) => {
+      state.equip.hair = v;
+      equip();
+    }),
+    checkbox('cape', 'Mantel', state.equip.cape, (v) => {
+      state.equip.cape = v;
+      equip();
+    }),
+    checkbox('pauldrons', 'Axelskydd', state.equip.pauldrons, (v) => {
+      state.equip.pauldrons = v;
+      equip();
+    }),
+  );
+}
+
 function refreshInfo() {
   if (!char) return;
   const s = modelStats(char.root);
   const c = char.controller;
   const size = s.box.getSize(new THREE.Vector3());
   const rows = [
-    ['Källa', state.source === 'GLB-rundtur' ? `GLB (${(state.glbBytes / 1024).toFixed(0)} kB), laddad med GLTFLoader` : 'procedurell'],
+    [
+      'Källa',
+      state.source === 'GLB-rundtur'
+        ? `GLB (${(state.glbBytes / 1024).toFixed(0)} kB), laddad med GLTFLoader`
+        : 'procedurell',
+    ],
     ['Ben', c.skeleton?.bones.length ?? 0],
     ['Trianglar', Math.round(s.triangles).toLocaleString('sv-SE')],
     ['Mesher', s.meshes],
@@ -356,7 +530,19 @@ function refreshInfo() {
     ['Klipp', char.clips.map((k) => k.name).join(', ')],
     ['Aktivt', c.current?.getClip().name ?? '–'],
   ];
-  if (PRESETS[state.preset].giant) rows.push(['Retargeting', `${char.clips.length} klipp på ${Math.round(state.retargetMs ?? 0)} ms`]);
+  if (char.entry) {
+    rows[0] = ['Källa', `${char.entry.file.split('/').pop()} (GLB) + ${char.entry.animations.length} animationsfiler`];
+    rows.push(['Licens', char.entry.license], ['Skapare', char.entry.creator]);
+    if (char.entry.substitutes?.length)
+      rows.push([
+        '* Ersättning',
+        Object.entries(char.entry.clipMap)
+          .map(([k, v]) => `${k} → ${v}`)
+          .join(', '),
+      ]);
+  }
+  if (PRESETS[state.preset]?.giant)
+    rows.push(['Retargeting', `${char.clips.length} klipp på ${Math.round(state.retargetMs ?? 0)} ms`]);
   info.innerHTML = `<h3>${state.preset}</h3><dl>${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>`;
 }
 
@@ -387,5 +573,23 @@ renderer.setAnimationLoop((t) => {
   }
 });
 
+try {
+  const manifest = await loader.loadManifest();
+  for (const e of manifest.characters ?? []) imported[e.name] = e;
+  const first = Object.values(imported)[0];
+  if (first) {
+    state.preset = first.name;
+    state.equip = { weapon: first.defaultWeapon ?? 'Inget', offhand: first.defaultOffhand ?? 'Ingen' };
+  }
+} catch (err) {
+  console.warn('Manifestet kunde inte läsas', err);
+}
+state.parts = {};
 await load();
-window.__characters = { state, get char() { return char; }, load };
+window.__characters = {
+  state,
+  get char() {
+    return char;
+  },
+  load,
+};

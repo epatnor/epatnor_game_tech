@@ -1,6 +1,8 @@
 # Tillgångslicenser
 
-> **Status:** inga externa tillgångar är importerade än. Byggmiljön kunde inte nå någon av källorna (itch.io, kenney.nl, opengameart.org, poly.pizza m.fl.), eftersom miljöns nätverksregler blockerar dem. Därför har **ingen licens verifierats i dag**. Varje licens måste kontrolleras på källsidan innan tillgången läggs i `public/assets/manifest.json`.
+> **Uppdatering 2026-10-14:** tre KayKit-paket är nedladdade manuellt och licensgranskade. Alla tre är **CC0 1.0** enligt `License.txt` i respektive arkiv. Licenstexterna finns i `assets/licenses/`. Övriga källor nedan är fortfarande overifierade.
+>
+> **Ursprunglig status:** inga externa tillgångar är importerade än. Byggmiljön kunde inte nå någon av källorna (itch.io, kenney.nl, opengameart.org, poly.pizza m.fl.), eftersom miljöns nätverksregler blockerar dem. Därför har **ingen licens verifierats i dag**. Varje licens måste kontrolleras på källsidan innan tillgången läggs i `public/assets/manifest.json`.
 
 ## Regler
 
@@ -35,4 +37,10 @@ Poly Haven och ambientCG är främst fotorealistiska. Enligt `ART_DIRECTION.md` 
 
 ## Importerade tillgångar
 
-Inga än. När en tillgång importeras läggs en rad till här med namn, skapare, källa, licens, datum för verifiering och eventuell attributionstext.
+| Tillgång | Skapare | Källa | Licens | Verifierad | Attribution | Licensfil |
+| --- | --- | --- | --- | --- | --- | --- |
+| KayKit Skeletons 1.1 (FREE): fyra karaktärer, Rig_Medium-animationer (General, MovementBasic), vapen | Kay Lousberg | https://kaylousberg.itch.io/kaykit-skeletons | CC0 1.0 | 2026-10-14, License.txt i arkivet | Frivillig ("Kay Lousberg, www.kaylousberg.com") | `assets/licenses/KayKit_Skeletons_1.1_License.txt` |
+| KayKit Forest Nature Pack 1.0 (FREE) | Kay Lousberg | https://kaylousberg.itch.io/kaykit-forest | CC0 1.0 | 2026-10-14, License.txt i arkivet | Frivillig | `assets/licenses/KayKit_Forest_Nature_Pack_1.0_License.txt` |
+| KayKit RPG Tools Bits 1.0 (FREE) | Kay Lousberg | https://kaylousberg.itch.io/ | CC0 1.0 | 2026-10-14, License.txt i arkivet | Frivillig | `assets/licenses/KayKit_RPGToolsBits_1.0_License.txt` |
+
+Eftersom de är CC0 får de ligga i det publika repot och publiceras på GitHub Pages. Forest Nature och RPG Tools Bits är granskade men inte importerade till runtime än.

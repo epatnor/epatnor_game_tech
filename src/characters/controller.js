@@ -14,18 +14,21 @@ export const DEFAULT_ALIASES = {
 };
 
 // Sockelnamn för stela tillbehör, matchade mot bennamn.
+// Mönstren prövas i ordning; den första som matchar något ben vinner. KayKit har särskilda
+// "handslot"-ben (handslot.r, efter GLTFLoaders namnstädning "handslotr") där vapnen ska sitta.
 const SOCKETS = {
-  handR: /(^|_|:)(hand_?r|righthand|hand\.r|wrist_?r)$/i,
-  handL: /(^|_|:)(hand_?l|lefthand|hand\.l|wrist_?l)$/i,
-  head: /(^|_|:)head$/i,
-  chest: /(^|_|:)(chest|spine1|spine2|upperchest)$/i,
+  handR: [/(^|_|:)handslot_?r$/i, /(^|_|:)(hand_?r|righthand|wrist_?r)$/i],
+  handL: [/(^|_|:)handslot_?l$/i, /(^|_|:)(hand_?l|lefthand|wrist_?l)$/i],
+  head: [/(^|_|:)head$/i],
+  chest: [/(^|_|:)(chest|spine1|spine2|upperchest)$/i],
 };
 
 const ONE_SHOT = new Set(['attack', 'hit', 'spellcast']);
 
 export class CharacterController {
   // root: objektet som innehåller SkinnedMesh och skelett. clips: AnimationClip[].
-  constructor(root, clips, { aliases = DEFAULT_ALIASES, fade = 0.25, walkSpeed = 1.6, runSpeed = 4.5 } = {}) {
+  // clipMap: { kanoniskt: klippnamn } går före alias, t.ex. för ersättningsklipp.
+  constructor(root, clips, { aliases = DEFAULT_ALIASES, clipMap = {}, fade = 0.25, walkSpeed = 1.6, runSpeed = 4.5 } = {}) {
     this.root = root;
     this.mixer = new THREE.AnimationMixer(root);
     this.fade = fade;
@@ -36,7 +39,11 @@ export class CharacterController {
     this.actions = {}; // kanoniskt namn -> action
     this.rawActions = {}; // klippnamn -> action
     for (const clip of clips) this.rawActions[clip.name] = this.mixer.clipAction(clip);
+    for (const [key, name] of Object.entries(clipMap)) {
+      if (this.rawActions[name]) this.actions[key] = this.rawActions[name];
+    }
     for (const [key, patterns] of Object.entries(aliases)) {
+      if (this.actions[key]) continue;
       for (const re of patterns) {
         const clip = clips.find((c) => re.test(c.name));
         if (clip) {
@@ -160,8 +167,13 @@ export class CharacterController {
 
   findBone(pattern) {
     if (!this.skeleton) return null;
-    const re = typeof pattern === 'string' ? SOCKETS[pattern] ?? new RegExp(`(^|_|:)${pattern}$`, 'i') : pattern;
-    return this.skeleton.bones.find((b) => re.test(b.name)) ?? null;
+    const list =
+      typeof pattern === 'string' ? (SOCKETS[pattern] ?? [new RegExp(`(^|_|:)${pattern}$`, 'i')]) : [pattern];
+    for (const re of list) {
+      const bone = this.skeleton.bones.find((b) => re.test(b.name));
+      if (bone) return bone;
+    }
+    return null;
   }
 
   // Stelt tillbehör på ett ben (vapen, sköld, hjälm). offset: {position, rotation, scale}.
