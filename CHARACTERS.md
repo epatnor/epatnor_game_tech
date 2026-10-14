@@ -21,6 +21,18 @@ Testkaraktären är vår egen, så det finns ingen licensfråga. Den finns för 
 - **GLB-rundtur:** karaktären exporteras med `GLTFExporter` och laddas tillbaka med `GLTFLoader`. Skelett, skinning och alla klipp överlever, och utrustningen fästs på de inlästa benen efter namn.
 - Inga konsolfel.
 
+## KayKit Skeletons (importerat 2026-10-14)
+
+- **Licens:** CC0 1.0, kontrollerad i `License.txt` i arkivet. Filerna får ligga i det publika repot.
+- **Karaktärer:** Skeleton_Warrior, Mage, Rogue och Minion som GLB med en gemensam textur. De är 6 000–7 000 trianglar, 10–12 mesher och 3–4 material. Hjälm, mantel, käke, ögon med mera är **separata mesher** och kan slås av och på i galleriet. Hjälmen är stel och sitter på `head`, resten är skinnat.
+- **Rigg:** `Rig_Medium` med 23 ben: `root, hips, spine, chest, head`, armarna `upperarm, lowerarm, wrist, hand, handslot` och benen `upperleg, lowerleg, foot, toes`, med suffixen `.l` och `.r`. GLTFLoader tar bort punkten i bennamnen (`hand.r` blir `handr`). Animationsfilerna har **samma bennamn** i en annan ordning, och det spelar ingen roll eftersom spåren binds efter namn.
+- **Klipp i gratispaketet:**
+  - Rig_Medium_General: Death_A/B, Hit_A/B, Idle_A/B, Interact, PickUp, Spawn_Air/Ground, T-Pose, Throw, Use_Item
+  - Rig_Medium_MovementBasic: Jump_*, Running_A/B, Walking_A/B/C
+- **Saknas:** riktiga Attack- och Spellcast-klipp. Galleriet använder Throw som ersättare för Attack och Use_Item för Spellcast, markerade med `*`. KayKit Character Animations (CC0 enligt tidigare uppgifter) har klipp för närstrid och magi till samma Rig_Medium. De går att lägga till utan retargeting genom att ladda upp de GLB-filerna och lägga dem i manifestets `animations`.
+- **Vapen:** fästs på `handslot.r` och `handslot.l`, som KayKit har gjort just för det. De behöver ingen offset.
+- **Retargeting av våra egna klipp till Rig_Medium:** inte gjort. KayKits ben har roterade lokala axlar (armarna troligen i T-pose), medan testkaraktären har armarna nedåt. `retargetClip` skulle då kräva att viloposerna först justeras mot varandra med `localOffsets`. Det är onödigt när KayKits egna stridsklipp finns för samma rigg.
+
 ## Utvärdering av de externa paketen
 
 > Inget av paketen kunde laddas ner eller licensgranskas. Byggmiljöns nätverksregler blockerar itch.io. Uppgifterna nedan bygger på tidigare kunskap och är **inte verifierade**.
@@ -59,7 +71,7 @@ CC0-paket (troligen KayKit) kan checkas in som optimerade GLB-filer.
 
 ## Nästa steg
 
-1. **Du:** godkänn förhandsgalleriet, eller säg vad som ska ändras.
+1. **Du:** godkänn förhandsgalleriet med skelettkrigaren, eller säg vad som ska ändras. Skicka gärna stridsanimationerna från KayKit Character Animations (Rig_Medium) för riktiga Attack- och Spellcast-klipp.
 2. Ladda ner ett paket manuellt, i första hand KayKit Adventurers och Character Animations eftersom de troligen är CC0. Lägg det i `assets/source/kaykit/`, så verifierar jag licensen i filen.
 3. Lägg in en riktig karaktär i galleriet via manifestet (`characters`), mappa klippnamnen (`DEFAULT_ALIASES` i `controller.js`) och prova utrustningen på dess ben.
 4. Efter godkännande: byt hjälten på ön mot `CharacterController` och koppla rörelsefart, attack och träff till spelet.

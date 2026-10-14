@@ -101,7 +101,7 @@ export function createAssetLoader(renderer) {
     });
   }
 
-  return { loadManifest, loadModel, loadTexture, gltf };
+  return { loadManifest, loadModel, loadTexture, gltf, url: (file) => `${BASE}assets/${file}` };
 }
 
 // Statistik för galleriet och prestandabudgeten.

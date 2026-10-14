@@ -4,7 +4,15 @@ Katalogen över tillgångar som är planerade eller importerade. Licensstatus fi
 
 ## Importerade
 
-Inga än. Byggmiljön kunde inte ladda ner något (se `ASSET_LICENSES.md`). Galleriet (`/gallery/`) visar i stället öns befintliga procedurella modeller: lövträd (fyra varianter, varav en höstvariant), palmer, granar, buskar, stenar och hjälten.
+| Tillgång | Runtime-filer | Användning | Status |
+| --- | --- | --- | --- |
+| KayKit Skeletons: Skeleton_Warrior, Mage, Rogue, Minion | `public/assets/characters/kaykit-skeletons/*.glb` (oförändrade) | Karaktärsgalleriet, senare fiender | I galleriet |
+| KayKit Rig_Medium-animationer: General, MovementBasic | `public/assets/characters/kaykit-skeletons/Rig_Medium_*.glb` | Idle, gång, löpning, träff, död, hopp | I galleriet |
+| KayKit Skeletons vapen: Blade, Axe, Staff, Crossbow, Shield_Large_A, Shield_Small_A | `public/assets/characters/kaykit-skeletons/weapons/` (glTF + bin + textur) | Fästs på handslot-benen | I galleriet |
+
+Originalarkiven ligger i `assets/source/`. Det första stycket nedan beskriver läget före importen.
+
+Tidigare: inga. Byggmiljön kunde inte ladda ner något (se `ASSET_LICENSES.md`). Galleriet (`/gallery/`) visar i stället öns befintliga procedurella modeller: lövträd (fyra varianter, varav en höstvariant), palmer, granar, buskar, stenar och hjälten.
 
 ## Planerade, i prioritetsordning
 
