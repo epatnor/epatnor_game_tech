@@ -298,18 +298,39 @@ async function main() {
   }
   window.addEventListener('resize', onResize);
 
-  await step('Kompilerar shaders…');
-  updateSky(true);
+  // Kompilera en shader i taget, så att laddningsskärmen hinner visa framsteg mellan varje.
+  // En shader som kompileras synkront blockerar huvudtråden, så räknaren står still under just den.
   player.update(0, 0);
   controls.update();
-  // Vänta på kompileringen men starta ändå efter en stund; resten kompileras då vid första bildrutan.
+  camera.updateMatrixWorld();
+  const jobs = [{ label: 'himmel för reflektioner', run: () => updateSky(true) }];
+  const seen = new Set();
+  scene.traverse((obj) => {
+    if (!obj.material) return;
+    const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+    const key = mats.map((m) => m.uuid).join() + (obj.isInstancedMesh ? ':i' : '');
+    if (seen.has(key)) return;
+    seen.add(key);
+    jobs.push({ label: mats[0].name || 'övrigt', run: () => renderer.compileAsync(obj, camera, scene) });
+  });
+  jobs.push({
+    label: 'skuggor och efterbehandling',
+    run: () => {
+      renderer.shadowMap.needsUpdate = true;
+      post.composer.render(0);
+    },
+  });
   const compileStart = performance.now();
-  const ticker = setInterval(() => {
-    loadingText.textContent = `Kompilerar shaders… ${Math.round((performance.now() - compileStart) / 1000)} s`;
-  }, 250);
-  await Promise.race([renderer.compileAsync(scene, camera), new Promise((r) => setTimeout(r, 15000))]);
-  clearInterval(ticker);
-  console.info(`Shaders kompilerade på ${Math.round(performance.now() - compileStart)} ms`);
+  for (let i = 0; i < jobs.length; i++) {
+    const job = jobs[i];
+    loadingText.textContent = `Kompilerar shaders ${i + 1} av ${jobs.length}: ${job.label}`;
+    await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));
+    const t0 = performance.now();
+    await Promise.race([job.run(), new Promise((r) => setTimeout(r, 20000))]);
+    const ms = performance.now() - t0;
+    if (ms > 300) console.info(`Shader "${job.label}" tog ${Math.round(ms)} ms`);
+  }
+  console.info(`${jobs.length} kompileringssteg klara på ${Math.round(performance.now() - compileStart)} ms`);
 
   const timer = new THREE.Timer();
   timer.connect(document);

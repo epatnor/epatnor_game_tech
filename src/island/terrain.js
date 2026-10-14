@@ -218,6 +218,7 @@ export function createTerrain(globals, seed = 11) {
   globals.uHeightMap.value = heightTex;
 
   const material = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.93, metalness: 0 });
+  material.name = 'terräng';
   material.customProgramCacheKey = () => 'terrain';
   material.onBeforeCompile = (shader) => {
     shader.uniforms.uTime = globals.uTime;

@@ -35,6 +35,7 @@ export function createWeather(globals) {
   const rain = new THREE.Mesh(
     quadGeometry(26000, rng),
     new THREE.ShaderMaterial({
+      name: 'regn',
       uniforms: rainUniforms,
       transparent: true,
       depthWrite: false,
@@ -94,6 +95,7 @@ export function createWeather(globals) {
   const splashes = new THREE.Mesh(
     quadGeometry(3000, rng),
     new THREE.ShaderMaterial({
+      name: 'regnstänk',
       uniforms: splashUniforms,
       transparent: true,
       depthWrite: false,
@@ -148,7 +150,7 @@ export function createWeather(globals) {
   group.add(splashes);
 
   // Blixtstråle: tunt rör längs en sicksackbana långt bort.
-  const boltMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(30, 32, 40), fog: false });
+  const boltMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(30, 32, 40), fog: false, name: 'blixt' });
   let bolt = null;
   function makeBolt(center) {
     if (bolt) {
