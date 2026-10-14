@@ -9,6 +9,9 @@ import { createWeather } from './weather.js';
 import { createProps } from './props.js';
 import { createPlayer } from './player.js';
 import { createPost } from './post.js';
+import { createEnemies } from './enemies.js';
+import { createAssetLoader } from '../assets/loader.js';
+import { createCharacterLoader } from '../characters/load.js';
 import { smoothstep } from './util.js';
 
 const loading = document.getElementById('loading');
@@ -98,7 +101,31 @@ async function main() {
   scene.add(hemi);
 
   await step('Väcker hjälten…');
+  // KayKit-riddaren som hjälte och KayKit-skeletten som fiender (CC0, se ASSET_LICENSES.md).
+  // Går laddningen fel används den procedurella hjälten och inga fiender.
+  const characterLoader = createCharacterLoader(createAssetLoader(renderer));
+  let heroModel = null;
+  let heroGear = null;
+  let skeletonEntries = [];
+  try {
+    const manifest = await createAssetLoader(renderer).loadManifest();
+    const heroEntry = manifest.characters.find((c) => c.id === 'kaykit-knight');
+    skeletonEntries = manifest.characters.filter((c) => c.category === 'KayKit Skeletons');
+    const loaded = await characterLoader.loadCharacter({ ...heroEntry, height: 1.9 });
+    heroModel = { ...loaded, entry: heroEntry };
+    heroGear = {
+      weapon: await characterLoader.loadProp(heroEntry.weapons[heroEntry.defaultWeapon]),
+      offhand: await characterLoader.loadProp(heroEntry.offhand[heroEntry.defaultOffhand]),
+    };
+  } catch (err) {
+    console.warn('Karaktärsmodellerna kunde inte laddas, använder den procedurella hjälten', err);
+  }
+  let enemies = null;
   const player = createPlayer({
+    model: heroModel,
+    gear: heroGear,
+    onAttack: (pos, yaw) => enemies?.playerAttack(pos, yaw),
+    onDeath: () => showToast('Du föll. Du vaknar snart vid stranden…'),
     scene,
     camera,
     dom: renderer.domElement,
@@ -109,6 +136,20 @@ async function main() {
     spawnYaw: props.spawnYaw,
     globals,
   });
+
+  // Mål-ruta som i WoW: visar fienden du slåss mot.
+  let target = null;
+  if (heroModel && skeletonEntries.length) {
+    await step('Väcker skeletten…');
+    enemies = await createEnemies({
+      scene,
+      terrain,
+      characterLoader,
+      entries: skeletonEntries,
+      player,
+      onTarget: (e) => (target = e),
+    });
+  }
 
   const settings = {
     time: 17.4,
@@ -173,7 +214,10 @@ async function main() {
     horizon.multiplyScalar(0.25);
     const nightAmb = new THREE.Color(0.012, 0.018, 0.035);
     zenith.lerp(grey.setScalar((zenith.r + zenith.g + zenith.b) / 3).multiplyScalar(0.5), storm * 0.8);
-    horizon.lerp(grey.setRGB(0.55, 0.6, 0.68).multiplyScalar(((horizon.r + horizon.g + horizon.b) / 3) * 0.8), storm * 0.85);
+    horizon.lerp(
+      grey.setRGB(0.55, 0.6, 0.68).multiplyScalar(((horizon.r + horizon.g + horizon.b) / 3) * 0.8),
+      storm * 0.85,
+    );
     globals.uSkyAmbient.value.copy(zenith).add(nightAmb.clone().multiplyScalar(night));
     globals.uHorizon.value.copy(horizon).add(nightAmb.clone().multiplyScalar(night * 0.6));
     scene.fog.color.copy(globals.uHorizon.value);
@@ -218,6 +262,21 @@ async function main() {
   }
 
   // --- HUD och inställningar ---
+  const playerFrame = document.getElementById('player-frame');
+  const targetFrame = document.getElementById('target-frame');
+  playerFrame.hidden = !heroModel;
+  function updateFrames() {
+    if (!heroModel) return;
+    playerFrame.querySelector('.bar > span').style.width = `${(player.hp / player.maxHp) * 100}%`;
+    playerFrame.querySelector('.hp').textContent = `${Math.ceil(player.hp)} / ${player.maxHp}`;
+    const show = target && (target.state !== 'dead' || target.deadTimer < 4) && target.root.visible;
+    targetFrame.hidden = !show;
+    if (!show) return;
+    targetFrame.querySelector('.name').textContent = target.name;
+    targetFrame.querySelector('.bar > span').style.width = `${(target.hp / target.maxHp) * 100}%`;
+    targetFrame.querySelector('.hp').textContent =
+      target.state === 'dead' ? 'Död' : `${Math.ceil(target.hp)} / ${target.maxHp}`;
+  }
   const counter = document.getElementById('crystals');
   const toast = document.getElementById('toast');
   counter.textContent = `0 / ${props.crystalCount}`;
@@ -263,7 +322,16 @@ async function main() {
   fWind.add(globals.uWindStrength, 'value', 0, 2, 0.01).name('styrka');
   // Kvalitetsnivåer: de dyraste delarna är himmel/moln per pixel, upplösning, AO och skuggor.
   const QUALITY = {
-    Ultra: { pr: Math.min(window.devicePixelRatio, 1.5), mode: 'physical', sky: 0.6, steps: 56, ao: true, rays: 0.55, shadow: 4096, grass: 1 },
+    Ultra: {
+      pr: Math.min(window.devicePixelRatio, 1.5),
+      mode: 'physical',
+      sky: 0.6,
+      steps: 56,
+      ao: true,
+      rays: 0.55,
+      shadow: 4096,
+      grass: 1,
+    },
     Hög: { pr: 1, mode: 'stylized', sky: 0.5, steps: 40, ao: false, rays: 0.55, shadow: 2048, grass: 1 },
     Medel: { pr: 1, mode: 'stylized', sky: 0.4, steps: 32, ao: false, rays: 0.55, shadow: 2048, grass: 0.6 },
     Låg: { pr: 0.75, mode: 'stylized', sky: 0.33, steps: 20, ao: false, rays: 0, shadow: 1024, grass: 0.35 },
@@ -304,14 +372,20 @@ async function main() {
       sky.setMode(m);
       lastEnv.cov = -1;
     });
-  fGfx.add(sky.quality, 'scale', 0.25, 1, 0.05).name('himmelsupplösning').onFinishChange(() => sky.resize());
+  fGfx
+    .add(sky.quality, 'scale', 0.25, 1, 0.05)
+    .name('himmelsupplösning')
+    .onFinishChange(() => sky.resize());
   fGfx.add(sky.uniforms.uCloudsOn, 'value', { på: 1, av: 0 }).name('volymetriska moln');
   fGfx.add(sky.uniforms.uCloudSteps, 'value', 16, 96, 1).name('molnsteg');
   fGfx.add(post.gtao, 'enabled').name('GTAO');
   fGfx.add(post.settings, 'rays', 0, 1.5, 0.01).name('ljusstrålar');
   fGfx.add(post.bloom, 'strength', 0, 1.5, 0.01).name('bloom');
   fGfx.add(sun, 'castShadow').name('skuggor');
-  fGfx.add(settings, 'grass').name('gräs').onChange((v) => (veg.grass.mesh.visible = v));
+  fGfx
+    .add(settings, 'grass')
+    .name('gräs')
+    .onChange((v) => (veg.grass.mesh.visible = v));
   fGfx.add(veg.grass.uniforms.uGrassHeight, 'value', 0.3, 2, 0.01).name('gräshöjd');
   fGfx.add(post.grade.uniforms.uSaturation, 'value', 0, 2, 0.01).name('mättnad');
   fGfx.close();
@@ -374,9 +448,8 @@ async function main() {
   let fpsTime = 0;
   const shadowTarget = new THREE.Vector3();
 
-  function tick(timestamp) {
-    timer.update(timestamp);
-    const dt = Math.min(timer.getDelta(), 0.05);
+  // Spellogik (utan rendering). Delad från tick så att tester kan köra logiken snabbt.
+  function simulate(dt) {
     globals.uTime.value += dt;
     const t = globals.uTime.value;
 
@@ -385,6 +458,8 @@ async function main() {
     updateSky();
 
     player.update(dt, t);
+    enemies?.update(dt, camera);
+    updateFrames();
     camera.updateMatrixWorld();
 
     sky.mesh.position.copy(camera.position);
@@ -407,6 +482,12 @@ async function main() {
 
     post.update(sunDir, sunTrans, daylight, sky.uniforms.uCoverage.value);
     post.grade.uniforms.uFlash.value = globals.uFlash.value;
+  }
+
+  function tick(timestamp) {
+    timer.update(timestamp);
+    const dt = Math.min(timer.getDelta(), 0.05);
+    simulate(dt);
 
     renderer.info.reset();
     sky.render(renderer, camera);
@@ -429,7 +510,22 @@ async function main() {
 
   loading.hidden = true;
   renderer.setAnimationLoop(tick);
-  window.__island = { settings, weather, sky, globals, player, veg };
+  // Utvecklarkrok: kör spellogiken i `seconds` sekunder utan att rendera (för automatiska tester).
+  const simulateFor = (seconds, step = 1 / 30) => {
+    for (let t = 0; t < seconds; t += step) simulate(step);
+  };
+  window.__island = {
+    simulate: simulateFor,
+    settings,
+    weather,
+    sky,
+    globals,
+    player,
+    veg,
+    get enemies() {
+      return enemies;
+    },
+  };
 }
 
 main().catch((err) => {

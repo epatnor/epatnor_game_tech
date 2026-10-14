@@ -2,11 +2,11 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
-import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 import '../gallery/gallery.css';
 import './preview.css';
 import { createAssetLoader, modelStats } from '../assets/loader.js';
 import { CharacterController } from './controller.js';
+import { createCharacterLoader } from './load.js';
 import { retargetClip, invertMap } from './retarget.js';
 import {
   buildCharacter,
@@ -108,38 +108,11 @@ const WEAPON_OFFSET = {
 };
 
 const loader = createAssetLoader(renderer);
-// Importerade karaktärer från manifestet (namn -> post) och en cache för laddade glTF-filer.
+// Importerade karaktärer från manifestet (namn -> post), laddade via den delade karaktärsladdaren.
 const imported = {};
-const gltfCache = new Map();
-const loadGltf = (file) => {
-  if (!gltfCache.has(file)) gltfCache.set(file, loader.gltf.loadAsync(loader.url(file)));
-  return gltfCache.get(file);
-};
-
-async function loadImported(entry) {
-  const [main, ...anims] = await Promise.all([loadGltf(entry.file), ...(entry.animations ?? []).map(loadGltf)]);
-  // SkeletonUtils.clone klonar skinnade mesher korrekt (Object3D.clone delar skelettet).
-  const root = SkeletonUtils.clone(main.scene);
-  const clips = [];
-  const seen = new Set();
-  for (const g of [main, ...anims]) {
-    for (const clip of g.animations) {
-      if (seen.has(clip.name)) continue;
-      seen.add(clip.name);
-      clips.push(clip);
-    }
-  }
-  return { root, clips };
-}
-
-async function loadProp(file) {
-  const g = await loadGltf(file);
-  const obj = g.scene.clone(true);
-  obj.traverse((o) => {
-    if (o.isMesh) o.castShadow = true;
-  });
-  return obj;
-}
+const characterLoader = createCharacterLoader(loader);
+const loadImported = (entry) => characterLoader.loadCharacter(entry);
+const loadProp = (file) => characterLoader.loadProp(file);
 const exporter = new GLTFExporter();
 const sourceClips = buildClips();
 let sourceHero = null; // referens för retargeting

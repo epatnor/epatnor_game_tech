@@ -43,4 +43,8 @@ Poly Haven och ambientCG är främst fotorealistiska. Enligt `ART_DIRECTION.md` 
 | KayKit Forest Nature Pack 1.0 (FREE) | Kay Lousberg | https://kaylousberg.itch.io/kaykit-forest | CC0 1.0 | 2026-10-14, License.txt i arkivet | Frivillig | `assets/licenses/KayKit_Forest_Nature_Pack_1.0_License.txt` |
 | KayKit RPG Tools Bits 1.0 (FREE) | Kay Lousberg | https://kaylousberg.itch.io/ | CC0 1.0 | 2026-10-14, License.txt i arkivet | Frivillig | `assets/licenses/KayKit_RPGToolsBits_1.0_License.txt` |
 
+| KayKit Adventurers 2.0 (FREE): sex hjältar och vapen | Kay Lousberg | https://kaylousberg.itch.io/kaykit-adventurers | CC0 1.0 | 2026-10-14, License.txt i arkivet | Frivillig | `assets/licenses/KayKit_Adventurers_2.0_License.txt` |
+| KayKit Character Animations 1.1: Rig_Medium General, MovementBasic, CombatMelee, Special | Kay Lousberg | https://kaylousberg.itch.io/kaykit-character-animations | CC0 1.0 | 2026-10-14, License.txt i arkivet | Frivillig | `assets/licenses/KayKit_Character_Animations_1.1_License.txt` |
+| Quaternius Universal Animation Library (Standard) | Quaternius | https://quaternius.itch.io/universal-animation-library | **CC0 1.0** (inte QAL) | 2026-10-14, License.txt i arkivet | Frivillig | `assets/licenses/Quaternius_Universal_Animation_Library_Standard_License.txt` |
+
 Eftersom de är CC0 får de ligga i det publika repot och publiceras på GitHub Pages. Forest Nature och RPG Tools Bits är granskade men inte importerade till runtime än.
