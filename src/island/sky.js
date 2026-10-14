@@ -322,20 +322,22 @@ float hg(float mu, float g) {
   return (1.0 - gg) / (4.0 * 3.14159265 * pow(1.0 + gg - 2.0 * g * mu, 1.5));
 }
 
+// textureLod i stället för texture: utan explicit LOD kräver texturuppslag i loopar derivator,
+// och då vecklar ANGLE/D3D (Windows) ut hela raymarch-loopen, vilket kan göra kompileringen mycket långsam.
 float cloudDensity(vec3 p, bool cheap) {
   float h = (p.y - CLOUD_BOTTOM) / (CLOUD_TOP - CLOUD_BOTTOM);
   if (h < 0.0 || h > 1.0) return 0.0;
   vec3 wind = vec3(uWindDir.x, 0.0, uWindDir.y) * uTime * uCloudSpeed;
   vec3 q = p + wind;
-  float weather = texture(uNoise, vec3(q.xz * 0.00004, 0.37)).b;
+  float weather = textureLod(uNoise, vec3(q.xz * 0.00004, 0.37), 0.0).b;
   float cov = clamp(uCoverage + (weather - 0.5) * 0.7, 0.0, 1.0);
-  float base = texture(uNoise, q * 0.00017).r;
+  float base = textureLod(uNoise, q * 0.00017, 0.0).r;
   // Platt botten, rundad topp (cumulus).
   float shape = smoothstep(0.0, 0.1, h) * smoothstep(1.0, 0.35 + 0.45 * cov, h);
   float d = remap(base * shape, 1.0 - cov, 1.0, 0.0, 1.0);
   if (d <= 0.0) return 0.0;
   if (!cheap) {
-    float detail = texture(uNoise, q * 0.0012 + vec3(0.0, uTime * 0.004, 0.0)).g;
+    float detail = textureLod(uNoise, q * 0.0012 + vec3(0.0, uTime * 0.004, 0.0), 0.0).g;
     d = remap(d, (1.0 - detail) * 0.32 * (1.0 - h * 0.4), 1.0, 0.0, 1.0);
   }
   return clamp(d, 0.0, 1.0) * uCloudDensity;
