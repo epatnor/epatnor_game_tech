@@ -10,6 +10,11 @@
   color-scheme: dark;
 }
 
+/* Attributet hidden måste vinna över display-reglerna nedan (t.ex. display: grid på #loading). */
+[hidden] {
+  display: none !important;
+}
+
 html,
 body {
   height: 100%;
