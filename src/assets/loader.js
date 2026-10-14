@@ -19,10 +19,25 @@ export function createAssetLoader(renderer) {
   const cache = new Map();
   const maxAniso = renderer.capabilities.getMaxAnisotropy();
 
+  // manifest.json checkas in. manifest.local.json och public/assets/local/ ignoreras av git och är
+  // till för tillgångar som får användas lokalt men inte publiceras (t.ex. licenser som förbjuder
+  // vidaredistribution). De följer aldrig med till GitHub Pages eftersom CI bygger från repot.
   async function loadManifest() {
     const res = await fetch(`${BASE}assets/manifest.json`);
     if (!res.ok) throw new Error(`Manifestet kunde inte laddas (${res.status})`);
-    return res.json();
+    const manifest = await res.json();
+    try {
+      const local = await fetch(`${BASE}assets/manifest.local.json`);
+      if (local.ok && (local.headers.get('content-type') ?? '').includes('json')) {
+        const extra = await local.json();
+        for (const key of ['models', 'textures', 'characters']) {
+          manifest[key] = [...(manifest[key] ?? []), ...(extra[key] ?? []).map((e) => ({ ...e, local: true }))];
+        }
+      }
+    } catch {
+      // Inget lokalt manifest.
+    }
+    return manifest;
   }
 
   // Laddar en modell en gång; varje anrop får en egen klon som delar geometri och material.

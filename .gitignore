@@ -7,3 +7,6 @@ assets/source/*
 !assets/source/README.md
 # Genereras av scripts/copy-decoders.mjs
 public/decoders/
+# Lokala tillgångar som inte får publiceras (se CHARACTERS.md och ASSET_LICENSES.md).
+public/assets/local/
+public/assets/manifest.local.json

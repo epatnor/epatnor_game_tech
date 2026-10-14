@@ -1,0 +1,83 @@
+/* Karaktärsgalleriet återanvänder tillgångsgalleriets layout och lägger till formulärkontroller. */
+#sidebar {
+  grid-template-rows: auto 1fr auto;
+}
+
+.panel {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.panel fieldset {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.panel legend {
+  margin-bottom: 4px;
+  color: var(--ink-dim);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.chips button {
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.chips button[aria-pressed='true'] {
+  background: var(--signal);
+  border-color: var(--signal);
+  color: var(--ground);
+}
+
+.chips button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 110px 1fr auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.row output {
+  min-width: 44px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.row select,
+.row input[type='range'] {
+  width: 100%;
+  min-width: 0;
+  font: inherit;
+  color: var(--ink);
+  background: var(--ground);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+
+.row input[type='checkbox'] {
+  justify-self: start;
+}
