@@ -10,6 +10,10 @@ Katalogen över tillgångar som är planerade eller importerade. Licensstatus fi
 | KayKit Rig_Medium-animationer: General, MovementBasic | `public/assets/characters/kaykit-skeletons/Rig_Medium_*.glb` | Idle, gång, löpning, träff, död, hopp | I galleriet |
 | KayKit Skeletons vapen: Blade, Axe, Staff, Crossbow, Shield_Large_A, Shield_Small_A | `public/assets/characters/kaykit-skeletons/weapons/` (glTF + bin + textur) | Fästs på handslot-benen | I galleriet |
 
+| KayKit Adventurers: Knight, Barbarian, Mage, Rogue, Rogue_Hooded, Ranger och vapen | `public/assets/characters/kaykit-adventurers/` | Riddaren är spelarens hjälte på ön, övriga finns i karaktärsgalleriet | På ön och i galleriet |
+| KayKit Character Animations (Rig_Medium): General, MovementBasic, CombatMelee, Special | `public/assets/characters/kaykit-animations/` | Rörelse, strid och skelettklipp för hjälte och fiender | På ön |
+| KayKit Forest Nature Pack: 11 lövträd, 3 barrträd, 6 kala träd, 11 buskar, 10 stenar, 2 grästuvor | `public/assets/models/nature/kaykit-forest/` (glTF, en gemensam textur) | All vegetation på ön utom palmerna | På ön och i tillgångsgalleriet |
+
 Originalarkiven ligger i `assets/source/`. Det första stycket nedan beskriver läget före importen.
 
 Tidigare: inga. Byggmiljön kunde inte ladda ner något (se `ASSET_LICENSES.md`). Galleriet (`/gallery/`) visar i stället öns befintliga procedurella modeller: lövträd (fyra varianter, varav en höstvariant), palmer, granar, buskar, stenar och hjälten.

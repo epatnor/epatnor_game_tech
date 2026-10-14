@@ -4,7 +4,7 @@ import './island.css';
 import { createTerrain, TERRAIN_SIZE, TERRAIN_RES } from './terrain.js';
 import { createSky, atmosphereJS, sunTransmittance } from './sky.js';
 import { createWater } from './water.js';
-import { createVegetation } from './vegetation.js';
+import { createVegetation, loadForestKit } from './vegetation.js';
 import { createWeather } from './weather.js';
 import { createProps } from './props.js';
 import { createPlayer } from './player.js';
@@ -68,7 +68,17 @@ async function main() {
   scene.add(props.group);
 
   await step('Planterar skog, palmer och gräs…');
-  const veg = createVegetation(globals, terrain, props.reserved);
+  // Tillgångar från manifestet (KayKit, CC0). Saknas de används de procedurella modellerna.
+  const assetLoader = createAssetLoader(renderer);
+  let manifest = { models: [], characters: [] };
+  let forestKit = null;
+  try {
+    manifest = await assetLoader.loadManifest();
+    forestKit = await loadForestKit(assetLoader, manifest);
+  } catch (err) {
+    console.warn('KayKit-vegetationen kunde inte laddas, använder procedurella växter', err);
+  }
+  const veg = createVegetation(globals, terrain, props.reserved, forestKit);
   scene.add(veg.group);
 
   await step('Genererar molnbrus…');
@@ -103,12 +113,11 @@ async function main() {
   await step('Väcker hjälten…');
   // KayKit-riddaren som hjälte och KayKit-skeletten som fiender (CC0, se ASSET_LICENSES.md).
   // Går laddningen fel används den procedurella hjälten och inga fiender.
-  const characterLoader = createCharacterLoader(createAssetLoader(renderer));
+  const characterLoader = createCharacterLoader(assetLoader);
   let heroModel = null;
   let heroGear = null;
   let skeletonEntries = [];
   try {
-    const manifest = await createAssetLoader(renderer).loadManifest();
     const heroEntry = manifest.characters.find((c) => c.id === 'kaykit-knight');
     skeletonEntries = manifest.characters.filter((c) => c.category === 'KayKit Skeletons');
     const loaded = await characterLoader.loadCharacter({ ...heroEntry, height: 1.9 });

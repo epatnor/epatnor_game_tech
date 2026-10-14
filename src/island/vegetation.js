@@ -354,7 +354,50 @@ class Occupancy {
   }
 }
 
-function createGrass(globals, count = 170000, R = 44) {
+// --- KayKit Forest Nature Pack (CC0) --------------------------------------------------------
+// Modellerna registreras i manifestet med en roll (tree-broadleaf, tree-conifer, tree-bare, bush,
+// rock, grass-short, grass-tall). Varje modell är en mesh med det gemensamma materialet "forest".
+export async function loadForestKit(assetLoader, manifest) {
+  const entries = (manifest.models ?? []).filter((m) => m.id.startsWith('kaykit-forest-') && m.role);
+  const roles = {};
+  let texture = null;
+  await Promise.all(
+    entries.map(async (m) => {
+      const g = await assetLoader.gltf.loadAsync(assetLoader.url(m.file));
+      g.scene.updateMatrixWorld(true);
+      let geo = null;
+      g.scene.traverse((o) => {
+        if (o.isMesh && !geo) {
+          geo = o.geometry.clone().applyMatrix4(o.matrixWorld);
+          texture ??= o.material.map;
+        }
+      });
+      (roles[m.role] ??= []).push({ name: m.name, geo });
+    }),
+  );
+  for (const list of Object.values(roles)) list.sort((a, b) => a.name.localeCompare(b.name));
+  if (texture) texture.anisotropy = 8;
+  return { roles, texture };
+}
+
+// Vindvikter för en importerad växt: 0 vid roten, 1 i toppen; fladder ovanför leafStart.
+function addWindWeights(geo, leafStart = 0.35) {
+  geo.computeBoundingBox();
+  const { min, max } = geo.boundingBox;
+  const h = Math.max(0.001, max.y - min.y);
+  const pos = geo.attributes.position;
+  const w = new Float32Array(pos.count * 2);
+  for (let i = 0; i < pos.count; i++) {
+    const t = (pos.getY(i) - min.y) / h;
+    w[i * 2] = t;
+    w[i * 2 + 1] = THREE.MathUtils.smoothstep(t, leafStart, leafStart + 0.25);
+  }
+  geo.setAttribute('aWind', new THREE.BufferAttribute(w, 2));
+  return geo;
+}
+
+// tuft: valfri importerad grästuva (geometri med uv) som ersätter de procedurella stråna.
+function createGrass(globals, { count = 170000, R = 44, tuft = null, map = null, seed = 99, name = 'gräs' } = {}) {
   const levels = 3; // 5 trianglar per strå
   const pos = [];
   for (let k = 0; k < levels; k++) {
@@ -372,10 +415,26 @@ function createGrass(globals, count = 170000, R = 44) {
   idx.push(last, last + 1, last + 2);
 
   const geo = new THREE.InstancedBufferGeometry();
-  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  geo.setAttribute('normal', new THREE.Float32BufferAttribute(new Array(pos.length).fill(0).map((_, i) => (i % 3 === 1 ? 1 : 0)), 3));
-  geo.setIndex(idx);
-  const rng = makeRng(99);
+  let tuftHeight = 1;
+  if (tuft) {
+    tuft.computeBoundingBox();
+    tuftHeight = tuft.boundingBox.max.y;
+    geo.setAttribute('position', tuft.attributes.position);
+    geo.setAttribute('normal', tuft.attributes.normal);
+    geo.setAttribute('uv', tuft.attributes.uv);
+    geo.setIndex(tuft.index);
+  } else {
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    geo.setAttribute(
+      'normal',
+      new THREE.Float32BufferAttribute(
+        new Array(pos.length).fill(0).map((_, i) => (i % 3 === 1 ? 1 : 0)),
+        3,
+      ),
+    );
+    geo.setIndex(idx);
+  }
+  const rng = makeRng(seed);
   const off = new Float32Array(count * 4);
   for (let i = 0; i < count; i++) {
     off[i * 4] = (rng() * 2 - 1) * R;
@@ -392,9 +451,11 @@ function createGrass(globals, count = 170000, R = 44) {
     uGrassHeight: { value: 1 },
     uGrassRoot: { value: new THREE.Color(0x2f6a22) },
     uGrassTip: { value: new THREE.Color(0x9ccf55) },
+    uTuftHeight: { value: tuftHeight },
   };
-  const material = new THREE.MeshStandardMaterial({ roughness: 0.82, side: THREE.DoubleSide, name: 'gräs' });
-  material.customProgramCacheKey = () => 'grass';
+  const material = new THREE.MeshStandardMaterial({ roughness: 0.82, side: THREE.DoubleSide, name, map });
+  if (tuft) material.defines = { TUFT: '' };
+  material.customProgramCacheKey = () => `grass-${name}-${tuft ? 'tuft' : 'blade'}`;
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms, {
       uTime: globals.uTime,
@@ -416,6 +477,7 @@ function createGrass(globals, count = 170000, R = 44) {
         uniform vec2 uGrassCenter;
         uniform float uGrassR;
         uniform float uGrassHeight;
+        uniform float uTuftHeight;
         uniform vec3 uPlayer;
         varying float vGrassW;
         varying vec3 vGrassTint;
@@ -435,10 +497,19 @@ function createGrass(globals, count = 170000, R = 44) {
         float ang = aOffset.z * 81.0 + aOffset.w * 17.0;
         float ca = cos(ang);
         float sa = sin(ang);
-        float wy = position.y;
-        vec2 lx = vec2(position.x * 0.13, wy * wy * 0.3 * bladeH);
-        vec2 xz = vec2(lx.x * ca - lx.y * sa, lx.x * sa + lx.y * ca);
-        vec3 transformed = vec3(base.x + xz.x, tr.r + wy * bladeH - 0.03, base.y + xz.y);
+        #ifdef TUFT
+          // Importerad tuva: modellens egna form, roterad och skalad per instans.
+          float wy = clamp(position.y / uTuftHeight, 0.0, 1.0);
+          float sc = (0.8 + aOffset.w * 0.7) * keep * uGrassHeight;
+          bladeH = uTuftHeight * sc;
+          vec2 xz = vec2(position.x * ca - position.z * sa, position.x * sa + position.z * ca) * sc;
+          vec3 transformed = vec3(base.x + xz.x, tr.r + position.y * sc - 0.03, base.y + xz.y);
+        #else
+          float wy = position.y;
+          vec2 lx = vec2(position.x * 0.13, wy * wy * 0.3 * bladeH);
+          vec2 xz = vec2(lx.x * ca - lx.y * sa, lx.x * sa + lx.y * ca);
+          vec3 transformed = vec3(base.x + xz.x, tr.r + wy * bladeH - 0.03, base.y + xz.y);
+        #endif
         float gust = windGust(base) * uWindStrength;
         vec2 bend = uWindDir * gust * 0.9
           + vec2(sin(uTime * 2.3 + aOffset.z * 40.0), cos(uTime * 1.9 + aOffset.w * 30.0)) * 0.12 * (0.3 + gust);
@@ -471,10 +542,15 @@ function createGrass(globals, count = 170000, R = 44) {
       .replace(
         '#include <color_fragment>',
         `#include <color_fragment>
-        vec3 gc = mix(uGrassRoot, uGrassTip, smoothstep(0.0, 1.0, vGrassW)) * vGrassTint;
-        if (vFlower > 0.5 && vGrassW > 0.78) gc = vFlowerCol * 0.9;
-        gc *= mix(0.55, 1.0, vGrassW);
-        diffuseColor.rgb = gc * mix(1.0, 0.7, uWet);`,
+        #ifdef TUFT
+          // Färgen kommer från tuvans textur (map_fragment); här bara variation och mörkare rot.
+          diffuseColor.rgb *= vGrassTint * mix(0.6, 1.0, vGrassW) * mix(1.0, 0.7, uWet);
+        #else
+          vec3 gc = mix(uGrassRoot, uGrassTip, smoothstep(0.0, 1.0, vGrassW)) * vGrassTint;
+          if (vFlower > 0.5 && vGrassW > 0.78) gc = vFlowerCol * 0.9;
+          gc *= mix(0.55, 1.0, vGrassW);
+          diffuseColor.rgb = gc * mix(1.0, 0.7, uWet);
+        #endif`,
       )
       .replace(
         '#include <normal_fragment_begin>',
@@ -494,7 +570,10 @@ function createGrass(globals, count = 170000, R = 44) {
 
 function createLeaves(globals, count = 700) {
   const geo = new THREE.InstancedBufferGeometry();
-  geo.setAttribute('position', new THREE.Float32BufferAttribute([-0.5, -0.5, 0, 0.5, -0.5, 0, 0.5, 0.5, 0, -0.5, 0.5, 0], 3));
+  geo.setAttribute(
+    'position',
+    new THREE.Float32BufferAttribute([-0.5, -0.5, 0, 0.5, -0.5, 0, 0.5, 0.5, 0, -0.5, 0.5, 0], 3),
+  );
   geo.setAttribute('uv', new THREE.Float32BufferAttribute([0, 0, 1, 0, 1, 1, 0, 1], 2));
   geo.setIndex([0, 1, 2, 0, 2, 3]);
   const rng = makeRng(5);
@@ -577,7 +656,7 @@ function createLeaves(globals, count = 700) {
   return mesh;
 }
 
-export function createVegetation(globals, terrain, reserved) {
+export function createVegetation(globals, terrain, reserved, kit = null) {
   const rng = makeRng(2024);
   const group = new THREE.Group();
   const occ = new Occupancy(6);
@@ -645,6 +724,12 @@ export function createVegetation(globals, terrain, reserved) {
     }
   }
 
+  // KayKit-modeller (om de laddats) ersätter de procedurella; samma placering och instansiering.
+  const K = kit?.roles ?? {};
+  const kitGeos = (role, leafStart) => (K[role] ?? []).map((m) => addWindWeights(m.geo.clone(), leafStart));
+  const kitMat = (name, side = THREE.FrontSide) =>
+    new THREE.MeshStandardMaterial({ map: kit.texture, roughness: 0.85, side, name });
+
   // Lövträd: tre gröna varianter och en höstvariant.
   const leafColors = [
     srgb(new THREE.Color(), 0.36, 0.62, 0.22),
@@ -652,7 +737,9 @@ export function createVegetation(globals, terrain, reserved) {
     srgb(new THREE.Color(), 0.44, 0.66, 0.2),
     srgb(new THREE.Color(), 0.95, 0.55, 0.16),
   ];
-  const leafMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.75, name: 'lövträd' });
+  const leafMat = K['tree-broadleaf']
+    ? kitMat('lövträd')
+    : new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.75, name: 'lövträd' });
   const leafDepth = patchFoliage(leafMat, globals, { sway: 0.32, sss: 0.75 });
   const broadleafPts = sample(30000, (x, z, h, slope) => {
     if (h < 2.5 || h > 32 || slope > 0.32) return null;
@@ -661,29 +748,62 @@ export function createVegetation(globals, terrain, reserved) {
     return { r: 2.4, max: 560 };
   });
   instanced(
-    leafColors.map((c, i) => buildBroadleaf(makeRng(10 + i), c)),
+    K['tree-broadleaf'] ? kitGeos('tree-broadleaf', 0.3) : leafColors.map((c, i) => buildBroadleaf(makeRng(10 + i), c)),
     leafMat,
     leafDepth,
     broadleafPts,
-    { scale: () => 0.8 + rng() * 0.6, tilt: 0.08, sink: 0.2, collide: 0.45 },
+    K['tree-broadleaf']
+      ? { scale: () => 1.25 + rng() * 0.5, tilt: 0.06, sink: 0.25, collide: 0.3 }
+      : { scale: () => 0.8 + rng() * 0.6, tilt: 0.08, sink: 0.2, collide: 0.45 },
   );
 
-  const conMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8, name: 'granar' });
+  const conMat = K['tree-conifer']
+    ? kitMat('barrträd')
+    : new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8, name: 'granar' });
   const conDepth = patchFoliage(conMat, globals, { sway: 0.22, sss: 0.35 });
   const coniferPts = sample(20000, (x, z, h, slope) => {
     if (h < 15 || h > 46 || slope > 0.45) return null;
     if (rng() > 0.45 + terrain.forestAt(x, z) * 0.5) return null;
     return { r: 1.9, max: 240 };
   });
-  instanced([buildConifer(makeRng(30)), buildConifer(makeRng(31))], conMat, conDepth, coniferPts, {
-    scale: () => 0.8 + rng() * 0.7,
-    tilt: 0.05,
-    sink: 0.2,
-    stretch: true,
-    collide: 0.4,
-  });
+  instanced(
+    K['tree-conifer'] ? kitGeos('tree-conifer', 0.2) : [buildConifer(makeRng(30)), buildConifer(makeRng(31))],
+    conMat,
+    conDepth,
+    coniferPts,
+    {
+      scale: () => (K['tree-conifer'] ? 1.0 + rng() * 0.45 : 0.8 + rng() * 0.7),
+      tilt: 0.05,
+      sink: 0.2,
+      stretch: !K['tree-conifer'],
+      collide: K['tree-conifer'] ? 0.3 : 0.4,
+    },
+  );
 
-  const palmMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.7, side: THREE.DoubleSide, name: 'palmer' });
+  // Kala träd på höjderna (bara med KayKit).
+  let barePts = [];
+  if (K['tree-bare']) {
+    const bareMat = kitMat('kala träd');
+    const bareDepth = patchFoliage(bareMat, globals, { sway: 0.15, sss: 0 });
+    barePts = sample(12000, (x, z, h, slope) => {
+      if (h < 12 || h > 48 || slope > 0.5) return null;
+      if (rng() > 0.35) return null;
+      return { r: 2.2, max: 70 };
+    });
+    instanced(kitGeos('tree-bare', 0.5), bareMat, bareDepth, barePts, {
+      scale: () => 1.1 + rng() * 0.5,
+      tilt: 0.08,
+      sink: 0.2,
+      collide: 0.25,
+    });
+  }
+
+  const palmMat = new THREE.MeshStandardMaterial({
+    vertexColors: true,
+    roughness: 0.7,
+    side: THREE.DoubleSide,
+    name: 'palmer',
+  });
   const palmDepth = patchFoliage(palmMat, globals, { sway: 0.45, sss: 0.9 });
   const palmPts = sample(30000, (x, z, h, slope) => {
     if (h < 0.7 || h > 3.6 || slope > 0.25) return null;
@@ -698,7 +818,9 @@ export function createVegetation(globals, terrain, reserved) {
     collide: 0.35,
   });
 
-  const bushMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8, name: 'buskar' });
+  const bushMat = K.bush
+    ? kitMat('buskar')
+    : new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8, name: 'buskar' });
   const bushDepth = patchFoliage(bushMat, globals, { sway: 0.25, sss: 0.6 });
   const bushPts = sample(30000, (x, z, h, slope) => {
     if (h < 1.6 || h > 36 || slope > 0.4) return null;
@@ -706,19 +828,28 @@ export function createVegetation(globals, terrain, reserved) {
     return { r: 1.0, max: 650, path: 1.9 };
   });
   instanced(
-    [
-      buildBush(makeRng(50), null),
-      buildBush(makeRng(51), srgb(new THREE.Color(), 1.0, 0.5, 0.75)),
-      buildBush(makeRng(52), srgb(new THREE.Color(), 1.0, 0.95, 0.85)),
-      buildBush(makeRng(53), srgb(new THREE.Color(), 0.85, 0.15, 0.15)),
-    ],
+    K.bush
+      ? kitGeos('bush', 0)
+      : [
+          buildBush(makeRng(50), null),
+          buildBush(makeRng(51), srgb(new THREE.Color(), 1.0, 0.5, 0.75)),
+          buildBush(makeRng(52), srgb(new THREE.Color(), 1.0, 0.95, 0.85)),
+          buildBush(makeRng(53), srgb(new THREE.Color(), 0.85, 0.15, 0.15)),
+        ],
     bushMat,
     bushDepth,
     bushPts,
-    { scale: () => 0.7 + rng() * 0.6, tilt: 0.1, sink: 0.1, castShadow: false },
+    {
+      scale: () => (K.bush ? 1.6 + rng() * 1.2 : 0.7 + rng() * 0.6),
+      tilt: 0.1,
+      sink: K.bush ? 0.05 : 0.1,
+      castShadow: false,
+    },
   );
 
-  const rockMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, flatShading: true, name: 'stenar' });
+  const rockMat = K.rock
+    ? kitMat('stenar')
+    : new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, flatShading: true, name: 'stenar' });
   rockMat.customProgramCacheKey = () => 'rock';
   rockMat.onBeforeCompile = (shader) => {
     shader.uniforms.uWet = globals.uWet;
@@ -735,13 +866,19 @@ export function createVegetation(globals, terrain, reserved) {
     if (rng() > 0.05 + slope * 1.4 + (h > 30 ? 0.3 : 0)) return null;
     return { r: 1.8, max: 230, path: 2.0 };
   });
-  instanced([buildRock(makeRng(60)), buildRock(makeRng(61)), buildRock(makeRng(62))], rockMat, null, rockPts, {
-    scale: () => 0.5 + Math.pow(rng(), 2) * 2.2,
-    tilt: 0.6,
-    sink: 0.25,
-    stretch: true,
-    collide: 0.9,
-  });
+  instanced(
+    K.rock ? K.rock.map((m) => m.geo) : [buildRock(makeRng(60)), buildRock(makeRng(61)), buildRock(makeRng(62))],
+    rockMat,
+    null,
+    rockPts,
+    {
+      scale: () => (K.rock ? 1.4 + Math.pow(rng(), 2) * 4 : 0.5 + Math.pow(rng(), 2) * 2.2),
+      tilt: K.rock ? 0.3 : 0.6,
+      sink: K.rock ? 0.1 : 0.25,
+      stretch: !K.rock,
+      collide: K.rock ? 0.35 : 0.9,
+    },
+  );
 
   // Skogsmasken till terrängtexturen: högre nära lövträd, så att löven faller där träden står.
   const treeOcc = new Occupancy(8);
@@ -759,7 +896,26 @@ export function createVegetation(globals, terrain, reserved) {
     return 1 - THREE.MathUtils.smoothstep(best, 2, 9);
   });
 
-  const grass = createGrass(globals);
+  // Gräs: KayKits tuvor (låga och höga) i samma oändliga, vindpåverkade system, annars procedurella strån.
+  let grass;
+  const extraGrass = [];
+  if (K['grass-short'] && K['grass-tall']) {
+    grass = createGrass(globals, { count: 38000, tuft: K['grass-short'][0].geo, map: kit.texture, name: 'gräs (låg)' });
+    const tall = createGrass(globals, {
+      count: 10000,
+      tuft: K['grass-tall'][0].geo,
+      map: kit.texture,
+      seed: 7,
+      name: 'gräs (hög)',
+    });
+    // Samma reglage styr båda.
+    tall.uniforms.uGrassCenter = grass.uniforms.uGrassCenter;
+    tall.uniforms.uGrassHeight = grass.uniforms.uGrassHeight;
+    extraGrass.push(tall);
+    grass.mesh.add(tall.mesh);
+  } else {
+    grass = createGrass(globals);
+  }
   group.add(grass.mesh);
   const leaves = createLeaves(globals);
   group.add(leaves);
