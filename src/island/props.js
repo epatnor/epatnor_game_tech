@@ -28,6 +28,7 @@ function createFire(globals, pos, rng) {
   const flames = new THREE.Mesh(
     billboardGeometry(90, rng),
     new THREE.ShaderMaterial({
+      name: 'eld',
       uniforms: { uTime: globals.uTime, uFirePos: { value: pos.clone() } },
       transparent: true,
       depthWrite: false,
@@ -75,6 +76,7 @@ function createFire(globals, pos, rng) {
   const smoke = new THREE.Mesh(
     billboardGeometry(40, rng),
     new THREE.ShaderMaterial({
+      name: 'rök',
       uniforms: {
         uTime: globals.uTime,
         uWindDir: globals.uWindDir,
@@ -136,7 +138,7 @@ function createFire(globals, pos, rng) {
 function createFlag(globals) {
   const geo = new THREE.PlaneGeometry(1.8, 1.1, 18, 8);
   geo.translate(0.9, 0, 0);
-  const mat = std(0x9e2b25, 0.8, { side: THREE.DoubleSide });
+  const mat = std(0x9e2b25, 0.8, { side: THREE.DoubleSide, name: 'flagga' });
   const inject = (shader) => {
     shader.uniforms.uTime = globals.uTime;
     shader.uniforms.uWindDir = globals.uWindDir;
@@ -335,6 +337,7 @@ export function createProps(globals, terrain) {
     roughness: 0.12,
     metalness: 0.1,
     flatShading: true,
+    name: 'kristaller',
   });
   const spots = [];
   spots.push(new THREE.Vector3(terrain.peak.x, terrain.peak.y, terrain.peak.z));

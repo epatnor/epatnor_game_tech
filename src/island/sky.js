@@ -454,6 +454,7 @@ export function createSky(globals) {
     depthWrite: false,
     fog: false,
   });
+  material.name = 'himmel och moln';
   const geo = new THREE.SphereGeometry(4000, 48, 24);
   const mesh = new THREE.Mesh(geo, material);
   mesh.frustumCulled = false;

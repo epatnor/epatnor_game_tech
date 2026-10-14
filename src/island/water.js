@@ -185,6 +185,7 @@ export function createWater(globals, envCube) {
     fog: true,
     side: THREE.DoubleSide,
   });
+  material.name = 'hav';
   const mesh = new THREE.Mesh(createOceanGeometry(), material);
   mesh.frustumCulled = false;
 

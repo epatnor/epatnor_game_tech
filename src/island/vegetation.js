@@ -393,7 +393,7 @@ function createGrass(globals, count = 170000, R = 44) {
     uGrassRoot: { value: new THREE.Color(0x2f6a22) },
     uGrassTip: { value: new THREE.Color(0x9ccf55) },
   };
-  const material = new THREE.MeshStandardMaterial({ roughness: 0.82, side: THREE.DoubleSide });
+  const material = new THREE.MeshStandardMaterial({ roughness: 0.82, side: THREE.DoubleSide, name: 'gräs' });
   material.customProgramCacheKey = () => 'grass';
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms, {
@@ -515,6 +515,7 @@ function createLeaves(globals, count = 700) {
     uSkyAmbient: globals.uSkyAmbient,
   });
   const material = new THREE.ShaderMaterial({
+    name: 'fallande löv',
     uniforms,
     fog: true,
     side: THREE.DoubleSide,
@@ -643,7 +644,7 @@ export function createVegetation(globals, terrain, reserved) {
     srgb(new THREE.Color(), 0.44, 0.66, 0.2),
     srgb(new THREE.Color(), 0.95, 0.55, 0.16),
   ];
-  const leafMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.75 });
+  const leafMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.75, name: 'lövträd' });
   const leafDepth = patchFoliage(leafMat, globals, { sway: 0.32, sss: 0.75 });
   const broadleafPts = sample(30000, (x, z, h, slope) => {
     if (h < 2.5 || h > 32 || slope > 0.32) return null;
@@ -659,7 +660,7 @@ export function createVegetation(globals, terrain, reserved) {
     { scale: () => 0.8 + rng() * 0.6, tilt: 0.08, sink: 0.2, collide: 0.45 },
   );
 
-  const conMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8 });
+  const conMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8, name: 'granar' });
   const conDepth = patchFoliage(conMat, globals, { sway: 0.22, sss: 0.35 });
   const coniferPts = sample(20000, (x, z, h, slope) => {
     if (h < 15 || h > 46 || slope > 0.45) return null;
@@ -674,7 +675,7 @@ export function createVegetation(globals, terrain, reserved) {
     collide: 0.4,
   });
 
-  const palmMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.7, side: THREE.DoubleSide });
+  const palmMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.7, side: THREE.DoubleSide, name: 'palmer' });
   const palmDepth = patchFoliage(palmMat, globals, { sway: 0.45, sss: 0.9 });
   const palmPts = sample(30000, (x, z, h, slope) => {
     if (h < 0.7 || h > 3.6 || slope > 0.25) return null;
@@ -689,7 +690,7 @@ export function createVegetation(globals, terrain, reserved) {
     collide: 0.35,
   });
 
-  const bushMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8 });
+  const bushMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8, name: 'buskar' });
   const bushDepth = patchFoliage(bushMat, globals, { sway: 0.25, sss: 0.6 });
   const bushPts = sample(30000, (x, z, h, slope) => {
     if (h < 1.6 || h > 36 || slope > 0.4) return null;
@@ -709,7 +710,7 @@ export function createVegetation(globals, terrain, reserved) {
     { scale: () => 0.7 + rng() * 0.6, tilt: 0.1, sink: 0.1 },
   );
 
-  const rockMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, flatShading: true });
+  const rockMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, flatShading: true, name: 'stenar' });
   rockMat.customProgramCacheKey = () => 'rock';
   rockMat.onBeforeCompile = (shader) => {
     shader.uniforms.uWet = globals.uWet;
