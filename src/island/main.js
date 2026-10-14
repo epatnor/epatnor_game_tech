@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import GUI from 'three/addons/libs/lil-gui.module.min.js';
 import './island.css';
 import { createTerrain, TERRAIN_SIZE, TERRAIN_RES } from './terrain.js';
@@ -56,12 +55,6 @@ async function main() {
   const scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0x9fb8d0, 0.0016);
   const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 9000);
-  const controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
-  controls.enablePan = false;
-  controls.minDistance = 2.5;
-  controls.maxDistance = 45;
-  controls.maxPolarAngle = Math.PI * 0.53;
 
   await step('Formar terrängen…');
   const terrain = createTerrain(globals);
@@ -108,7 +101,7 @@ async function main() {
   const player = createPlayer({
     scene,
     camera,
-    controls,
+    dom: renderer.domElement,
     terrain,
     colliders: [...veg.colliders, ...props.colliders],
     floorAt: props.floorAt,
@@ -342,7 +335,6 @@ async function main() {
   // Kompilera en shader i taget, så att laddningsskärmen hinner visa framsteg mellan varje.
   // En shader som kompileras synkront blockerar huvudtråden, så räknaren står still under just den.
   player.update(0, 0);
-  controls.update();
   camera.updateMatrixWorld();
   const jobs = [
     { label: 'himmel för reflektioner', run: () => updateSky(true) },
@@ -393,8 +385,6 @@ async function main() {
     updateSky();
 
     player.update(dt, t);
-    controls.update();
-    player.clampCamera();
     camera.updateMatrixWorld();
 
     sky.mesh.position.copy(camera.position);
