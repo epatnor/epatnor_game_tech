@@ -3,6 +3,8 @@
 three.js-lekplats för grafikexperiment (Vite, vanlig JavaScript). Svara på svenska.
 
 - Experiment ligger i `src/experiments/` och registreras i `src/experiments/index.js`. Se README för formatet.
+- Azshara Island (stiliserat RPG, tung grafik) ligger i `island/index.html` och `src/island/`. Delade uniforms finns i `globals` i `src/island/main.js`, och delade GLSL-bitar (brus, vind, regnringar, terränguppslag) i `src/island/glsl.js`.
+- Vite bygger flera sidor, så nya sidor läggs till i `build.rollupOptions.input` i `vite.config.js`.
 - `main` publiceras automatiskt till https://epatnor.github.io/epatnor_game_tech/ via `.github/workflows/pages.yml`.
 - Verifiera ändringar med `npm run build`.
 

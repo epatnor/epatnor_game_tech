@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Azshara Island</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Nunito+Sans:wght@400;600&display=swap"
+    />
+  </head>
+  <body>
+    <div id="app"></div>
+    <div id="hud">
+      <div class="title">
+        <h1>Azshara Island</h1>
+        <p class="quest">Hitta kristallerna <span id="crystals">0 / 6</span></p>
+      </div>
+      <p class="keys">WASD gå · Shift spring · Space hoppa · dra för att titta · scrolla för zoom</p>
+    </div>
+    <div id="toast" hidden></div>
+    <div id="stats"></div>
+    <a id="back" href="../">← Game Tech Lab</a>
+    <div id="loading">
+      <h2>Azshara Island</h2>
+      <p id="loading-text">Laddar…</p>
+    </div>
+    <script type="module" src="/src/island/main.js"></script>
+  </body>
+</html>

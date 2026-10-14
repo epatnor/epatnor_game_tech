@@ -1,0 +1,180 @@
+/* Layout: helskärmsspel; titel och uppdrag uppe till vänster, lil-gui uppe till höger, status nere. */
+:root {
+  --parchment: #f3e6c4;
+  --ink: #2b1d10;
+  --gold: #e2b65a;
+  --night: rgba(14, 18, 26, 0.62);
+  --line: rgba(243, 230, 196, 0.25);
+  --font-display: 'Cinzel', Georgia, 'Times New Roman', serif;
+  --font-body: 'Nunito Sans', 'Segoe UI', system-ui, sans-serif;
+  color-scheme: dark;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #0d1118;
+  color: var(--parchment);
+  font-family: var(--font-body);
+}
+
+#app,
+#app canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+
+#hud {
+  position: fixed;
+  top: calc(14px + env(safe-area-inset-top, 0px));
+  left: max(16px, env(safe-area-inset-left, 0px));
+  display: grid;
+  gap: 6px;
+  pointer-events: none;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+#hud h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(22px, 3.2vw, 34px);
+  letter-spacing: 0.04em;
+}
+
+.quest {
+  margin: 0;
+  font-size: 14px;
+}
+
+#crystals {
+  margin-left: 6px;
+  padding: 2px 8px;
+  border: 1px solid var(--gold);
+  border-radius: 999px;
+  color: var(--gold);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.keys {
+  margin: 0;
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+#toast {
+  position: fixed;
+  top: 30%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 22px;
+  background: var(--night);
+  border: 1px solid var(--gold);
+  border-radius: 8px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--gold);
+  pointer-events: none;
+}
+
+#stats {
+  position: fixed;
+  left: max(16px, env(safe-area-inset-left, 0px));
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  font-size: 12px;
+  opacity: 0.8;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+#back {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right, 0px));
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  color: var(--parchment);
+  font-size: 12px;
+  opacity: 0.75;
+  text-decoration: none;
+}
+
+#back:hover,
+#back:focus-visible {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+#loading {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  background: radial-gradient(circle at 50% 40%, #1d3550, #0d1118 70%);
+}
+
+#loading h2 {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 40px;
+  color: var(--gold);
+}
+
+#loading p {
+  margin: 0;
+  opacity: 0.8;
+}
+
+.lil-gui.root {
+  position: fixed;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+#joystick {
+  position: fixed;
+  left: max(24px, env(safe-area-inset-left, 0px));
+  bottom: calc(48px + env(safe-area-inset-bottom, 0px));
+  width: 120px;
+  height: 120px;
+  border: 2px solid var(--line);
+  border-radius: 50%;
+  background: rgba(14, 18, 26, 0.3);
+  touch-action: none;
+}
+
+#joystick .knob {
+  position: absolute;
+  left: 35px;
+  top: 35px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(243, 230, 196, 0.55);
+}
+
+#jump {
+  position: fixed;
+  right: max(24px, env(safe-area-inset-right, 0px));
+  bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+  width: 84px;
+  height: 84px;
+  border: 2px solid var(--line);
+  border-radius: 50%;
+  background: rgba(14, 18, 26, 0.4);
+  color: var(--parchment);
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+@media (pointer: coarse) {
+  .keys {
+    display: none;
+  }
+}
