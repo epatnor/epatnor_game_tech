@@ -302,7 +302,14 @@ async function main() {
   updateSky(true);
   player.update(0, 0);
   controls.update();
-  await renderer.compileAsync(scene, camera);
+  // Vänta på kompileringen men starta ändå efter en stund; resten kompileras då vid första bildrutan.
+  const compileStart = performance.now();
+  const ticker = setInterval(() => {
+    loadingText.textContent = `Kompilerar shaders… ${Math.round((performance.now() - compileStart) / 1000)} s`;
+  }, 250);
+  await Promise.race([renderer.compileAsync(scene, camera), new Promise((r) => setTimeout(r, 15000))]);
+  clearInterval(ticker);
+  console.info(`Shaders kompilerade på ${Math.round(performance.now() - compileStart)} ms`);
 
   const timer = new THREE.Timer();
   timer.connect(document);
