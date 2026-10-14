@@ -13,6 +13,7 @@ export default defineConfig({
         main: resolve(import.meta.dirname, 'index.html'),
         island: resolve(import.meta.dirname, 'island/index.html'),
         gallery: resolve(import.meta.dirname, 'gallery/index.html'),
+        characters: resolve(import.meta.dirname, 'characters/index.html'),
       },
     },
   },

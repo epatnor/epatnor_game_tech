@@ -2,5 +2,6 @@
   "version": 1,
   "note": "Runtime-manifest för importerade tillgångar. Se ASSET_CATALOG.md och INTEGRATION_NOTES.md. Varje modell kräver verifierad licens innan den läggs till här.",
   "models": [],
-  "textures": []
+  "textures": [],
+  "characters": []
 }
