@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 const WATER_SWIM_DEPTH = -1.1;
 
-function buildHero() {
+export function buildHero() {
   const mat = (color, roughness = 0.7, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness, ...extra });
   const skin = mat(0xf1c27d, 0.6);
   const tunic = mat(0xb03a2e);
@@ -74,21 +74,87 @@ function buildHero() {
   return { root, body, head, legL, legR, armL, armR, cape };
 }
 
-function createInput() {
+// Styrning som i World of Warcraft:
+// höger musknapp + dra styr hjälten (vänder sig efter kameran), vänster + dra är fri mouselook,
+// båda knapparna springer framåt, A/D svänger (strafe med höger knapp nedtryckt), Q/E strafe.
+// På pekskärm: dra för att titta, joystick för att gå.
+function createInput(dom) {
   const keys = new Set();
-  const state = { x: 0, y: 0, run: false, jump: false, touch: false };
+  const state = {
+    camYaw: 0,
+    pitch: 0.32,
+    dist: 9,
+    distTarget: 9,
+    left: false,
+    right: false,
+    jx: 0,
+    jy: 0,
+    jumpTouch: false,
+  };
   addEventListener('keydown', (e) => {
     if (e.target instanceof HTMLInputElement) return;
     keys.add(e.code);
     if (e.code === 'Space') e.preventDefault();
   });
   addEventListener('keyup', (e) => keys.delete(e.code));
-  addEventListener('blur', () => keys.clear());
+  addEventListener('blur', () => {
+    keys.clear();
+    state.left = state.right = false;
+  });
+
+  dom.addEventListener('contextmenu', (e) => e.preventDefault());
+  const touches = new Map();
+  dom.addEventListener('pointerdown', (e) => {
+    dom.setPointerCapture(e.pointerId);
+    if (e.pointerType === 'mouse') {
+      if (e.button === 0) state.left = true;
+      if (e.button === 2) state.right = true;
+      dom.style.cursor = 'none';
+    } else {
+      touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    }
+  });
+  const release = (e) => {
+    if (e.pointerType === 'mouse') {
+      if (e.button === 0) state.left = false;
+      if (e.button === 2) state.right = false;
+      if (!state.left && !state.right) dom.style.cursor = '';
+    } else {
+      touches.delete(e.pointerId);
+    }
+  };
+  dom.addEventListener('pointerup', release);
+  dom.addEventListener('pointercancel', release);
+  dom.addEventListener('pointermove', (e) => {
+    let dx = 0;
+    let dy = 0;
+    if (e.pointerType === 'mouse') {
+      if (!state.left && !state.right) return;
+      dx = e.movementX;
+      dy = e.movementY;
+    } else {
+      const t = touches.get(e.pointerId);
+      if (!t) return;
+      dx = e.clientX - t.x;
+      dy = e.clientY - t.y;
+      t.x = e.clientX;
+      t.y = e.clientY;
+    }
+    state.camYaw -= dx * 0.005;
+    state.pitch = Math.min(1.35, Math.max(-0.35, state.pitch + dy * 0.005));
+  });
+  dom.addEventListener(
+    'wheel',
+    (e) => {
+      e.preventDefault();
+      state.distTarget = Math.min(40, Math.max(2.5, state.distTarget * Math.exp(e.deltaY * 0.0012)));
+    },
+    { passive: false },
+  );
 
   // Joystick för pekskärmar.
-  let joy = null;
   if (matchMedia('(pointer: coarse)').matches) {
-    joy = document.createElement('div');
+    const joy = document.createElement('div');
     joy.id = 'joystick';
     joy.innerHTML = '<div class="knob"></div>';
     document.body.appendChild(joy);
@@ -135,30 +201,34 @@ function createInput() {
     joy.addEventListener('touchcancel', end);
   }
 
-  return () => {
-    let x = 0;
-    let y = 0;
-    if (keys.has('KeyW') || keys.has('ArrowUp')) y += 1;
-    if (keys.has('KeyS') || keys.has('ArrowDown')) y -= 1;
-    if (keys.has('KeyD') || keys.has('ArrowRight')) x += 1;
-    if (keys.has('KeyA') || keys.has('ArrowLeft')) x -= 1;
-    if (state.jx || state.jy) {
-      x = state.jx;
-      y = state.jy;
-    }
-    state.x = x;
-    state.y = y;
-    state.run = keys.has('ShiftLeft') || keys.has('ShiftRight') || Math.hypot(x, y) > 0.92 && !!(state.jx || state.jy);
-    state.jump = keys.has('Space') || !!state.jumpTouch;
+  const input = { forward: 0, strafe: 0, turn: 0, walk: false, jump: false, steering: false, joystick: false };
+  function read() {
+    const k = (c) => keys.has(c);
+    const ad = (k('KeyD') || k('ArrowRight') ? 1 : 0) - (k('KeyA') || k('ArrowLeft') ? 1 : 0);
+    input.steering = state.right;
+    input.forward = (k('KeyW') || k('ArrowUp') ? 1 : 0) - (k('KeyS') || k('ArrowDown') ? 1 : 0);
+    if (state.left && state.right) input.forward = 1;
+    input.strafe = (k('KeyE') ? 1 : 0) - (k('KeyQ') ? 1 : 0);
+    input.turn = 0;
+    if (state.right) input.strafe = Math.max(-1, Math.min(1, input.strafe + ad));
+    else input.turn = ad;
+    input.walk = k('ShiftLeft') || k('ShiftRight');
+    input.jump = k('Space') || state.jumpTouch;
     state.jumpTouch = false;
-    return state;
-  };
+    input.joystick = !!(state.jx || state.jy);
+    input.jx = state.jx;
+    input.jy = state.jy;
+    return input;
+  }
+
+  return { state, read };
 }
 
-export function createPlayer({ scene, camera, controls, terrain, colliders, floorAt, spawn, spawnYaw, globals }) {
+export function createPlayer({ scene, camera, dom, terrain, colliders, floorAt, spawn, spawnYaw, globals }) {
   const hero = buildHero();
   scene.add(hero.root);
-  const readInput = createInput();
+  const controls = createInput(dom);
+  const cam = controls.state;
 
   const pos = spawn.clone();
   pos.y = Math.max(terrain.getHeight(pos.x, pos.z), floorAt(pos.x, pos.z));
@@ -200,11 +270,9 @@ export function createPlayer({ scene, camera, controls, terrain, colliders, floo
 
   const groundAt = (x, z) => Math.max(terrain.getHeight(x, z), floorAt(x, z));
 
-  // Kamera bakom hjälten.
-  const behind = new THREE.Vector3(Math.sin(yaw), 0, Math.cos(yaw)).multiplyScalar(-7);
-  controls.target.set(pos.x, pos.y + 1.6, pos.z);
-  camera.position.copy(controls.target).add(behind).add(new THREE.Vector3(0, 2.6, 0));
-  controls.update();
+  // Kameran börjar bakom hjälten.
+  cam.camYaw = yaw;
+  const camTarget = new THREE.Vector3();
 
   const fwd = new THREE.Vector3();
   const right = new THREE.Vector3();
@@ -212,16 +280,33 @@ export function createPlayer({ scene, camera, controls, terrain, colliders, floo
   const next = new THREE.Vector3();
 
   function update(dt, t) {
-    const input = readInput();
-    fwd.copy(controls.target).sub(camera.position).setY(0).normalize();
-    right.set(-fwd.z, 0, fwd.x);
-    move.copy(fwd).multiplyScalar(input.y).addScaledVector(right, input.x);
+    const input = controls.read();
+    // Sväng med A/D (kameran följer med), eller vänd hjälten efter kameran med höger musknapp.
+    if (input.steering) yaw = cam.camYaw;
+    else if (input.turn) {
+      const dyaw = -input.turn * 2.6 * dt;
+      yaw += dyaw;
+      cam.camYaw += dyaw;
+    }
+    let backward = false;
+    if (input.joystick) {
+      // Pekskärm: joysticken går relativt kameran och hjälten vänder sig åt rörelseriktningen.
+      fwd.set(Math.sin(cam.camYaw), 0, Math.cos(cam.camYaw));
+      right.set(-fwd.z, 0, fwd.x);
+      move.copy(fwd).multiplyScalar(input.jy).addScaledVector(right, input.jx);
+    } else {
+      fwd.set(Math.sin(yaw), 0, Math.cos(yaw));
+      right.set(-fwd.z, 0, fwd.x);
+      move.copy(fwd).multiplyScalar(input.forward).addScaledVector(right, input.strafe);
+      backward = input.forward < 0;
+    }
     const amount = Math.min(1, move.length());
     if (amount > 0.01) move.normalize();
 
     const ground = groundAt(pos.x, pos.z);
     swimming = ground < WATER_SWIM_DEPTH;
-    const speed = swimming ? 2.8 : input.run ? 8.5 : 4.3;
+    let speed = swimming ? 2.8 : input.walk ? 2.5 : 7;
+    if (backward) speed *= 0.6;
     const target = move.clone().multiplyScalar(speed * amount);
     vel.lerp(target, Math.min(1, dt * (grounded || swimming ? 10 : 2.5)));
 
@@ -235,7 +320,6 @@ export function createPlayer({ scene, camera, controls, terrain, colliders, floo
       next.x = pos.x;
       next.z = pos.z;
     }
-    const delta = next.clone().sub(pos);
     pos.x = next.x;
     pos.z = next.z;
 
@@ -263,11 +347,10 @@ export function createPlayer({ scene, camera, controls, terrain, colliders, floo
         grounded = false;
       }
     }
-    delta.y = 0;
 
-    // Vänd hjälten mot rörelseriktningen.
+    // Med joystick vänder sig hjälten mot rörelseriktningen; annars styr A/D och musen.
     const horiz = Math.hypot(vel.x, vel.z);
-    if (horiz > 0.3) {
+    if (input.joystick && horiz > 0.3) {
       const targetYaw = Math.atan2(vel.x, vel.z);
       let d = targetYaw - yaw;
       d = Math.atan2(Math.sin(d), Math.cos(d));
@@ -277,7 +360,7 @@ export function createPlayer({ scene, camera, controls, terrain, colliders, floo
     hero.root.rotation.y = yaw;
 
     // Animation.
-    const runF = Math.min(1, horiz / 8.5);
+    const runF = Math.min(1, horiz / 7);
     walkPhase += dt * (horiz * 1.6 + (swimming ? 3 : 0));
     const swing = Math.sin(walkPhase) * Math.min(1, horiz / 3) * (0.5 + runF * 0.4);
     if (swimming) {
@@ -307,9 +390,17 @@ export function createPlayer({ scene, camera, controls, terrain, colliders, floo
     hero.cape.rotation.x = 0.15 + runF * 0.9 + Math.sin(t * 6) * 0.05 * (0.5 + wind) + (grounded ? 0 : 0.4);
     hero.head.rotation.y = Math.sin(t * 0.5) * 0.15 * (1 - runF);
 
-    // Kameran följer med samma förflyttning, så att orbit-läget behålls.
-    camera.position.add(delta);
-    controls.target.set(pos.x, pos.y + 1.6, pos.z);
+    // Kameran kretsar runt hjälten enligt kamerans vinkel, lutning och avstånd.
+    cam.dist += (cam.distTarget - cam.dist) * Math.min(1, dt * 10);
+    camTarget.set(pos.x, pos.y + 1.6, pos.z);
+    const cp = Math.cos(cam.pitch);
+    camera.position.set(
+      camTarget.x - Math.sin(cam.camYaw) * cp * cam.dist,
+      camTarget.y + Math.sin(cam.pitch) * cam.dist,
+      camTarget.z - Math.cos(cam.camYaw) * cp * cam.dist,
+    );
+    clampCamera();
+    camera.lookAt(camTarget);
     globals.uPlayer.value.copy(pos);
   }
 
@@ -322,6 +413,10 @@ export function createPlayer({ scene, camera, controls, terrain, colliders, floo
     update,
     clampCamera,
     position: pos,
+    get yaw() {
+      return yaw;
+    },
+    camera: cam,
     get swimming() {
       return swimming;
     },
