@@ -103,6 +103,22 @@ body {
   border-color: var(--signal);
 }
 
+#island-link {
+  justify-self: start;
+  padding: 6px 10px;
+  border: 1px solid var(--signal);
+  border-radius: 6px;
+  color: var(--signal);
+  text-decoration: none;
+  font-size: 12px;
+}
+
+#island-link:hover,
+#island-link:focus-visible {
+  background: var(--signal);
+  color: var(--ground);
+}
+
 #desc {
   margin: 0;
   line-height: 1.55;

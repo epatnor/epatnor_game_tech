@@ -15,6 +15,25 @@ En lekplats för grafikexperiment i [three.js](https://threejs.org/).
 
 Välj experiment i panelen uppe till vänster, eller länka direkt med `#pbr`, `#shader`, `#instancing` eller `#bloom`. Reglagen uppe till höger (lil-gui) ändrar parametrarna live.
 
+## Azshara Island
+
+**Live:** https://epatnor.github.io/epatnor_game_tech/island/
+
+Ett litet stiliserat RPG på en ö, byggt för att testa tung realtidsgrafik utan hänsyn till svag hårdvara. Koden ligger i `src/island/`.
+
+| Område | Teknik |
+| --- | --- |
+| Himmel | Fysikaliskt baserad atmosfär (Rayleigh + Mie, raymarchad per pixel). Samma modell i JS ger solljusets färg, omgivningsljus och dimfärg |
+| Moln | Raymarchade volymetriska moln från ett tileable 3D-brus (Perlin-Worley + Worley-fbm), Beer–powder-belysning, tvålobig fasfunktion, vind |
+| Ljus | Dygnscykel med sol och måne, 4096-skuggkarta som följer spelaren, IBL från en cubemap av himlen (PMREM), GTAO, ljusstrålar i skärmrymd, bloom |
+| Hav | Gerstner-vågor på ett radiellt rutnät, djupfärg från terrängens höjdkarta, skum vid strand och vågkammar, fresnelreflektion, subsurface i vågkammar |
+| Vegetation | Instansierade lövträd med sfäriska normaler och genomlysning, palmer, granar, buskar, stenar, oändligt gräs med blommor runt spelaren, fallande löv |
+| Vind | Ett gemensamt vindfält (GLSL + JS) som styr gräs, träd, löv, rök, flagga, regn och moln. Skuggorna följer vindrörelsen |
+| Väder | Regnstrimmor som lutar med vinden, stänk, ringar i vatten och pölar, blöta ytor som torkar långsamt, blixtar |
+| Spel | Tredjepersonshjälte som går, springer, hoppar och simmar. Kollision mot träd och föremål, sex kristaller att hitta |
+
+Styrning: WASD eller piltangenter, Shift för att springa, Space för att hoppa, dra med musen för att titta. På mobil finns en joystick.
+
 ## Kom igång
 
 ```sh
