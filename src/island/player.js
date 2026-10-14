@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { CharacterController } from '../characters/controller.js';
 
 const WATER_SWIM_DEPTH = -1.1;
 
@@ -33,7 +34,14 @@ export function buildHero() {
   head.position.set(0, 1.74, 0);
   body.add(head);
   add(head, new THREE.SphereGeometry(0.26, 24, 16), skin, 0, 0, 0);
-  const hairCap = add(head, new THREE.SphereGeometry(0.275, 24, 16, 0, Math.PI * 2, 0, Math.PI * 0.55), hair, 0, 0.02, -0.02);
+  const hairCap = add(
+    head,
+    new THREE.SphereGeometry(0.275, 24, 16, 0, Math.PI * 2, 0, Math.PI * 0.55),
+    hair,
+    0,
+    0.02,
+    -0.02,
+  );
   hairCap.rotation.x = -0.35;
   const eyeMat = mat(0x1a1a1a, 0.3);
   add(head, new THREE.SphereGeometry(0.035, 8, 6), eyeMat, -0.09, 0.02, 0.235);
@@ -166,6 +174,14 @@ function createInput(dom) {
       e.preventDefault();
       state.jumpTouch = true;
     });
+    const attack = document.createElement('button');
+    attack.id = 'attack';
+    attack.textContent = 'Anfall';
+    document.body.appendChild(attack);
+    attack.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      state.attackTouch = true;
+    });
     const knob = joy.querySelector('.knob');
     let id = null;
     const move = (t) => {
@@ -214,6 +230,8 @@ function createInput(dom) {
     else input.turn = ad;
     input.walk = k('ShiftLeft') || k('ShiftRight');
     input.jump = k('Space') || state.jumpTouch;
+    input.attack = k('Digit1') || k('KeyF') || state.attackTouch;
+    state.attackTouch = false;
     state.jumpTouch = false;
     input.joystick = !!(state.jx || state.jy);
     input.jx = state.jx;
@@ -224,9 +242,45 @@ function createInput(dom) {
   return { state, read };
 }
 
-export function createPlayer({ scene, camera, dom, terrain, colliders, floorAt, spawn, spawnYaw, globals }) {
-  const hero = buildHero();
+const ATTACKS = ['Melee_1H_Attack_Chop', 'Melee_1H_Attack_Slice_Diagonal', 'Melee_1H_Attack_Stab'];
+
+// model: { root, clips, entry } från karaktärsladdaren (KayKit-riddaren). Utan model används den
+// procedurella hjälten. gear: { weapon, offhand } som fästs på handslot-benen.
+export function createPlayer({
+  scene,
+  camera,
+  dom,
+  terrain,
+  colliders,
+  floorAt,
+  spawn,
+  spawnYaw,
+  globals,
+  model,
+  gear,
+  onAttack,
+  onDeath,
+}) {
+  const hero = model ? { root: model.root } : buildHero();
   scene.add(hero.root);
+  let anim = null;
+  if (model) {
+    anim = new CharacterController(model.root, model.clips, {
+      clipMap: model.entry?.clipMap,
+      walkSpeed: 2.2,
+      runSpeed: 6.5,
+    });
+    if (gear?.weapon) anim.attach('weapon', gear.weapon, 'handR');
+    if (gear?.offhand) anim.attach('offhand', gear.offhand, 'handL');
+  }
+  const maxHp = 100;
+  let hp = maxHp;
+  let dead = false;
+  let deadTimer = 0;
+  let attackCooldown = 0;
+  let attackHitTimer = -1;
+  let attackIndex = 0;
+  let airborne = false;
   const controls = createInput(dom);
   const cam = controls.state;
 
@@ -281,6 +335,13 @@ export function createPlayer({ scene, camera, dom, terrain, colliders, floorAt, 
 
   function update(dt, t) {
     const input = controls.read();
+    if (dead) {
+      input.forward = input.strafe = input.turn = 0;
+      input.jump = input.attack = false;
+      input.joystick = false;
+      deadTimer += dt;
+      if (deadTimer > 5) respawn();
+    }
     // Sväng med A/D (kameran följer med), eller vänd hjälten efter kameran med höger musknapp.
     if (input.steering) yaw = cam.camYaw;
     else if (input.turn) {
@@ -306,6 +367,7 @@ export function createPlayer({ scene, camera, dom, terrain, colliders, floorAt, 
     const ground = groundAt(pos.x, pos.z);
     swimming = ground < WATER_SWIM_DEPTH;
     let speed = swimming ? 2.8 : input.walk ? 2.5 : 7;
+    if (anim?.oneShot) speed *= 0.35; // rör sig långsamt under anfall och träff
     if (backward) speed *= 0.6;
     const target = move.clone().multiplyScalar(speed * amount);
     vel.lerp(target, Math.min(1, dt * (grounded || swimming ? 10 : 2.5)));
@@ -359,36 +421,61 @@ export function createPlayer({ scene, camera, dom, terrain, colliders, floorAt, 
     hero.root.position.copy(pos);
     hero.root.rotation.y = yaw;
 
-    // Animation.
+    // Strid: anfall med 1 eller F, träffen räknas en bit in i hugget.
+    attackCooldown -= dt;
+    if (anim && input.attack && attackCooldown <= 0 && !swimming) {
+      const name = ATTACKS[attackIndex++ % ATTACKS.length];
+      if (!anim.play(name, { once: true })) anim.trigger('attack');
+      attackCooldown = 0.8;
+      attackHitTimer = 0.35;
+    }
+    if (attackHitTimer >= 0) {
+      attackHitTimer -= dt;
+      if (attackHitTimer < 0) onAttack?.(pos, yaw);
+    }
+
+    if (anim) {
+      // Hopp: Jump_Idle i luften, tillbaka till rörelse vid landning.
+      const inAir = !grounded && !swimming && vy !== 0;
+      if (inAir && !airborne && !dead && !anim.oneShot) anim.play('Jump_Idle', { fade: 0.15 });
+      if (!inAir && airborne && !dead && !anim.oneShot) anim.play(anim.locomotion, { fade: 0.15 });
+      airborne = inAir;
+      if (!airborne) anim.setSpeed(horiz);
+      anim.update(dt);
+    }
+
+    // Animation (procedurell hjälte).
     const runF = Math.min(1, horiz / 7);
     walkPhase += dt * (horiz * 1.6 + (swimming ? 3 : 0));
     const swing = Math.sin(walkPhase) * Math.min(1, horiz / 3) * (0.5 + runF * 0.4);
-    if (swimming) {
-      hero.armL.rotation.set(-Math.PI * 0.5 + Math.sin(walkPhase) * 0.9, 0, -0.3);
-      hero.armR.rotation.set(-Math.PI * 0.5 - Math.sin(walkPhase) * 0.9, 0, 0.3);
-      hero.legL.rotation.x = Math.sin(walkPhase * 2) * 0.4;
-      hero.legR.rotation.x = -Math.sin(walkPhase * 2) * 0.4;
-      hero.body.rotation.x = 0.5;
-      hero.body.position.y = 0.1;
-    } else {
-      hero.legL.rotation.x = swing;
-      hero.legR.rotation.x = -swing;
-      hero.armL.rotation.set(-swing * 0.8, 0, -0.08);
-      hero.armR.rotation.set(swing * 0.8, 0, 0.08);
-      hero.body.rotation.x = runF * 0.15;
-      const bob = Math.abs(Math.cos(walkPhase)) * 0.06 * Math.min(1, horiz / 3);
-      const breathe = Math.sin(t * 2) * 0.01;
-      hero.body.position.y = bob + breathe;
-      if (!grounded) {
-        hero.legL.rotation.x = 0.5;
-        hero.legR.rotation.x = -0.3;
-        hero.armL.rotation.x = -1.2;
-        hero.armR.rotation.x = -1.2;
+    if (!anim) {
+      if (swimming) {
+        hero.armL.rotation.set(-Math.PI * 0.5 + Math.sin(walkPhase) * 0.9, 0, -0.3);
+        hero.armR.rotation.set(-Math.PI * 0.5 - Math.sin(walkPhase) * 0.9, 0, 0.3);
+        hero.legL.rotation.x = Math.sin(walkPhase * 2) * 0.4;
+        hero.legR.rotation.x = -Math.sin(walkPhase * 2) * 0.4;
+        hero.body.rotation.x = 0.5;
+        hero.body.position.y = 0.1;
+      } else {
+        hero.legL.rotation.x = swing;
+        hero.legR.rotation.x = -swing;
+        hero.armL.rotation.set(-swing * 0.8, 0, -0.08);
+        hero.armR.rotation.set(swing * 0.8, 0, 0.08);
+        hero.body.rotation.x = runF * 0.15;
+        const bob = Math.abs(Math.cos(walkPhase)) * 0.06 * Math.min(1, horiz / 3);
+        const breathe = Math.sin(t * 2) * 0.01;
+        hero.body.position.y = bob + breathe;
+        if (!grounded) {
+          hero.legL.rotation.x = 0.5;
+          hero.legR.rotation.x = -0.3;
+          hero.armL.rotation.x = -1.2;
+          hero.armR.rotation.x = -1.2;
+        }
       }
+      const wind = globals.uWindStrength.value;
+      hero.cape.rotation.x = 0.15 + runF * 0.9 + Math.sin(t * 6) * 0.05 * (0.5 + wind) + (grounded ? 0 : 0.4);
+      hero.head.rotation.y = Math.sin(t * 0.5) * 0.15 * (1 - runF);
     }
-    const wind = globals.uWindStrength.value;
-    hero.cape.rotation.x = 0.15 + runF * 0.9 + Math.sin(t * 6) * 0.05 * (0.5 + wind) + (grounded ? 0 : 0.4);
-    hero.head.rotation.y = Math.sin(t * 0.5) * 0.15 * (1 - runF);
 
     // Kameran kretsar runt hjälten enligt kamerans vinkel, lutning och avstånd.
     cam.dist += (cam.distTarget - cam.dist) * Math.min(1, dt * 10);
@@ -404,6 +491,30 @@ export function createPlayer({ scene, camera, dom, terrain, colliders, floorAt, 
     globals.uPlayer.value.copy(pos);
   }
 
+  function respawn() {
+    dead = false;
+    deadTimer = 0;
+    hp = maxHp;
+    pos.copy(spawn);
+    pos.y = groundAt(pos.x, pos.z);
+    vel.set(0, 0, 0);
+    anim?.revive();
+  }
+
+  // Skada från fiender. Returnerar true om hjälten dog av träffen.
+  function takeDamage(amount) {
+    if (dead) return false;
+    hp = Math.max(0, hp - amount);
+    if (hp <= 0) {
+      dead = true;
+      anim?.die();
+      onDeath?.();
+      return true;
+    }
+    if (anim && !anim.oneShot) anim.trigger('hit');
+    return false;
+  }
+
   function clampCamera() {
     const h = Math.max(terrain.getHeight(camera.position.x, camera.position.z), 0) + 0.7;
     if (camera.position.y < h) camera.position.y = h;
@@ -412,6 +523,16 @@ export function createPlayer({ scene, camera, dom, terrain, colliders, floorAt, 
   return {
     update,
     clampCamera,
+    takeDamage,
+    collide,
+    get hp() {
+      return hp;
+    },
+    maxHp,
+    get dead() {
+      return dead;
+    },
+    controller: anim,
     position: pos,
     get yaw() {
       return yaw;

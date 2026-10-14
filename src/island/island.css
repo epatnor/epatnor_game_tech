@@ -74,6 +74,61 @@ body {
   opacity: 0.75;
 }
 
+#frames {
+  position: fixed;
+  top: calc(14px + env(safe-area-inset-top, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.frame {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 3px 10px;
+  width: min(220px, 40vw);
+  padding: 6px 10px 8px;
+  background: var(--night);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.frame .name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--gold);
+}
+
+.frame .hp {
+  grid-column: 2;
+  grid-row: 1;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+
+.frame .bar {
+  grid-column: 1 / -1;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.frame .bar > span {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: #4fbf5a;
+  transition: width 0.2s;
+}
+
+.frame.enemy .bar > span {
+  background: #d0453a;
+}
+
 #toast {
   position: fixed;
   top: 30%;
@@ -164,7 +219,8 @@ body {
   background: rgba(243, 230, 196, 0.55);
 }
 
-#jump {
+#jump,
+#attack {
   position: fixed;
   right: max(24px, env(safe-area-inset-right, 0px));
   bottom: calc(60px + env(safe-area-inset-bottom, 0px));
@@ -176,6 +232,10 @@ body {
   color: var(--parchment);
   font-family: var(--font-body);
   font-size: 14px;
+}
+
+#attack {
+  bottom: calc(160px + env(safe-area-inset-bottom, 0px));
 }
 
 @media (pointer: coarse) {

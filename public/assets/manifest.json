@@ -1,9 +1,858 @@
 {
   "version": 1,
   "note": "Runtime-manifest för importerade tillgångar. Se ASSET_CATALOG.md och INTEGRATION_NOTES.md. Varje modell kräver verifierad licens innan den läggs till här.",
-  "models": [],
+  "models": [
+    {
+      "id": "kaykit-forest-tree-1-a",
+      "name": "Tree 1 A",
+      "category": "nature/trees",
+      "role": "tree-broadleaf",
+      "file": "models/nature/kaykit-forest/Tree_1_A_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-tree-1-b",
+      "name": "Tree 1 B",
+      "category": "nature/trees",
+      "role": "tree-broadleaf",
+      "file": "models/nature/kaykit-forest/Tree_1_B_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-tree-1-c",
+      "name": "Tree 1 C",
+      "category": "nature/trees",
+      "role": "tree-broadleaf",
+      "file": "models/nature/kaykit-forest/Tree_1_C_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-tree-3-a",
+      "name": "Tree 3 A",
+      "category": "nature/trees",
+      "role": "tree-broadleaf",
+      "file": "models/nature/kaykit-forest/Tree_3_A_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-tree-3-b",
+      "name": "Tree 3 B",
+      "category": "nature/trees",
+      "role": "tree-broadleaf",
+      "file": "models/nature/kaykit-forest/Tree_3_B_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-tree-3-c",
+      "name": "Tree 3 C",
+      "category": "nature/trees",
+      "role": "tree-broadleaf",
+      "file": "models/nature/kaykit-forest/Tree_3_C_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-tree-2-a",
+      "name": "Tree 2 A",
+      "category": "nature/trees",
+      "role": "tree-broadleaf",
+      "file": "models/nature/kaykit-forest/Tree_2_A_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-tree-2-b",
+      "name": "Tree 2 B",
+      "category": "nature/trees",
+      "role": "tree-broadleaf",
+      "file": "models/nature/kaykit-forest/Tree_2_B_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-tree-2-c",
+      "name": "Tree 2 C",
+      "category": "nature/trees",
+      "role": "tree-broadleaf",
+      "file": "models/nature/kaykit-forest/Tree_2_C_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-tree-2-d",
+      "name": "Tree 2 D",
+      "category": "nature/trees",
+      "role": "tree-broadleaf",
+      "file": "models/nature/kaykit-forest/Tree_2_D_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-tree-2-e",
+      "name": "Tree 2 E",
+      "category": "nature/trees",
+      "role": "tree-broadleaf",
+      "file": "models/nature/kaykit-forest/Tree_2_E_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-tree-4-a",
+      "name": "Tree 4 A",
+      "category": "nature/trees",
+      "role": "tree-conifer",
+      "file": "models/nature/kaykit-forest/Tree_4_A_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-tree-4-b",
+      "name": "Tree 4 B",
+      "category": "nature/trees",
+      "role": "tree-conifer",
+      "file": "models/nature/kaykit-forest/Tree_4_B_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-tree-4-c",
+      "name": "Tree 4 C",
+      "category": "nature/trees",
+      "role": "tree-conifer",
+      "file": "models/nature/kaykit-forest/Tree_4_C_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-tree-bare-1-a",
+      "name": "Tree Bare 1 A",
+      "category": "nature/trees",
+      "role": "tree-bare",
+      "file": "models/nature/kaykit-forest/Tree_Bare_1_A_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-tree-bare-1-b",
+      "name": "Tree Bare 1 B",
+      "category": "nature/trees",
+      "role": "tree-bare",
+      "file": "models/nature/kaykit-forest/Tree_Bare_1_B_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-tree-bare-1-c",
+      "name": "Tree Bare 1 C",
+      "category": "nature/trees",
+      "role": "tree-bare",
+      "file": "models/nature/kaykit-forest/Tree_Bare_1_C_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-tree-bare-2-a",
+      "name": "Tree Bare 2 A",
+      "category": "nature/trees",
+      "role": "tree-bare",
+      "file": "models/nature/kaykit-forest/Tree_Bare_2_A_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-tree-bare-2-b",
+      "name": "Tree Bare 2 B",
+      "category": "nature/trees",
+      "role": "tree-bare",
+      "file": "models/nature/kaykit-forest/Tree_Bare_2_B_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-tree-bare-2-c",
+      "name": "Tree Bare 2 C",
+      "category": "nature/trees",
+      "role": "tree-bare",
+      "file": "models/nature/kaykit-forest/Tree_Bare_2_C_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-bush-1-a",
+      "name": "Bush 1 A",
+      "category": "nature/bushes",
+      "role": "bush",
+      "file": "models/nature/kaykit-forest/Bush_1_A_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-bush-1-c",
+      "name": "Bush 1 C",
+      "category": "nature/bushes",
+      "role": "bush",
+      "file": "models/nature/kaykit-forest/Bush_1_C_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-bush-1-e",
+      "name": "Bush 1 E",
+      "category": "nature/bushes",
+      "role": "bush",
+      "file": "models/nature/kaykit-forest/Bush_1_E_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-bush-2-a",
+      "name": "Bush 2 A",
+      "category": "nature/bushes",
+      "role": "bush",
+      "file": "models/nature/kaykit-forest/Bush_2_A_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-bush-2-c",
+      "name": "Bush 2 C",
+      "category": "nature/bushes",
+      "role": "bush",
+      "file": "models/nature/kaykit-forest/Bush_2_C_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-bush-2-e",
+      "name": "Bush 2 E",
+      "category": "nature/bushes",
+      "role": "bush",
+      "file": "models/nature/kaykit-forest/Bush_2_E_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-bush-3-a",
+      "name": "Bush 3 A",
+      "category": "nature/bushes",
+      "role": "bush",
+      "file": "models/nature/kaykit-forest/Bush_3_A_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-bush-3-b",
+      "name": "Bush 3 B",
+      "category": "nature/bushes",
+      "role": "bush",
+      "file": "models/nature/kaykit-forest/Bush_3_B_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-bush-4-a",
+      "name": "Bush 4 A",
+      "category": "nature/bushes",
+      "role": "bush",
+      "file": "models/nature/kaykit-forest/Bush_4_A_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-bush-4-c",
+      "name": "Bush 4 C",
+      "category": "nature/bushes",
+      "role": "bush",
+      "file": "models/nature/kaykit-forest/Bush_4_C_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-bush-4-e",
+      "name": "Bush 4 E",
+      "category": "nature/bushes",
+      "role": "bush",
+      "file": "models/nature/kaykit-forest/Bush_4_E_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-rock-1-a",
+      "name": "Rock 1 A",
+      "category": "nature/rocks",
+      "role": "rock",
+      "file": "models/nature/kaykit-forest/Rock_1_A_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-rock-1-e",
+      "name": "Rock 1 E",
+      "category": "nature/rocks",
+      "role": "rock",
+      "file": "models/nature/kaykit-forest/Rock_1_E_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-rock-1-j",
+      "name": "Rock 1 J",
+      "category": "nature/rocks",
+      "role": "rock",
+      "file": "models/nature/kaykit-forest/Rock_1_J_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-rock-2-a",
+      "name": "Rock 2 A",
+      "category": "nature/rocks",
+      "role": "rock",
+      "file": "models/nature/kaykit-forest/Rock_2_A_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-rock-2-d",
+      "name": "Rock 2 D",
+      "category": "nature/rocks",
+      "role": "rock",
+      "file": "models/nature/kaykit-forest/Rock_2_D_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-rock-2-g",
+      "name": "Rock 2 G",
+      "category": "nature/rocks",
+      "role": "rock",
+      "file": "models/nature/kaykit-forest/Rock_2_G_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-rock-3-a",
+      "name": "Rock 3 A",
+      "category": "nature/rocks",
+      "role": "rock",
+      "file": "models/nature/kaykit-forest/Rock_3_A_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-rock-3-f",
+      "name": "Rock 3 F",
+      "category": "nature/rocks",
+      "role": "rock",
+      "file": "models/nature/kaykit-forest/Rock_3_F_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-rock-3-k",
+      "name": "Rock 3 K",
+      "category": "nature/rocks",
+      "role": "rock",
+      "file": "models/nature/kaykit-forest/Rock_3_K_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-rock-3-p",
+      "name": "Rock 3 P",
+      "category": "nature/rocks",
+      "role": "rock",
+      "file": "models/nature/kaykit-forest/Rock_3_P_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-grass-1-a-singlesided",
+      "name": "Grass 1 A Singlesided",
+      "category": "nature/grass",
+      "role": "grass-short",
+      "file": "models/nature/kaykit-forest/Grass_1_A_Singlesided_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    },
+    {
+      "id": "kaykit-forest-grass-2-a-singlesided",
+      "name": "Grass 2 A Singlesided",
+      "category": "nature/grass",
+      "role": "grass-tall",
+      "file": "models/nature/kaykit-forest/Grass_2_A_Singlesided_Color1.gltf",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-forest",
+      "license": "CC0 1.0 (License.txt i KayKit_Forest_Nature_Pack_1.0_FREE, kontrollerad 2026-10-14)",
+      "attribution": null,
+      "originalFormat": "glTF",
+      "convertedFormat": "oförändrad glTF",
+      "intendedUse": "Vegetation på Azshara Island"
+    }
+  ],
   "textures": [],
   "characters": [
+    {
+      "id": "kaykit-knight",
+      "name": "Riddare",
+      "file": "characters/kaykit-adventurers/Knight.glb",
+      "defaultWeapon": "Svärd",
+      "defaultOffhand": "Vapensköld",
+      "intendedUse": "Spelbar hjälte",
+      "category": "KayKit Adventurers",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-adventurers",
+      "license": "CC0 1.0 (License.txt i KayKit_Adventurers_2.0_FREE, kontrollerad 2026-10-14); animationer: KayKit Character Animations 1.1, CC0 1.0",
+      "attribution": null,
+      "originalFormat": "GLB/glTF",
+      "convertedFormat": "oförändrad GLB/glTF",
+      "rig": "Rig_Medium",
+      "animations": [
+        "characters/kaykit-animations/Rig_Medium_General.glb",
+        "characters/kaykit-animations/Rig_Medium_MovementBasic.glb",
+        "characters/kaykit-animations/Rig_Medium_CombatMelee.glb",
+        "characters/kaykit-animations/Rig_Medium_Special.glb"
+      ],
+      "clipMap": {
+        "attack": "Melee_1H_Attack_Chop",
+        "spellcast": "Use_Item"
+      },
+      "substitutes": [
+        "spellcast"
+      ],
+      "weapons": {
+        "Svärd": "characters/kaykit-adventurers/weapons/sword_1handed.gltf",
+        "Yxa": "characters/kaykit-adventurers/weapons/axe_1handed.gltf",
+        "Dolk": "characters/kaykit-adventurers/weapons/dagger.gltf",
+        "Stav": "characters/kaykit-adventurers/weapons/staff.gltf",
+        "Trollstav": "characters/kaykit-adventurers/weapons/wand.gltf",
+        "Båge": "characters/kaykit-adventurers/weapons/bow_withString.gltf"
+      },
+      "offhand": {
+        "Rund sköld": "characters/kaykit-adventurers/weapons/shield_round.gltf",
+        "Vapensköld": "characters/kaykit-adventurers/weapons/shield_badge_color.gltf"
+      }
+    },
+    {
+      "id": "kaykit-barbarian",
+      "name": "Barbar",
+      "file": "characters/kaykit-adventurers/Barbarian.glb",
+      "defaultWeapon": "Yxa",
+      "defaultOffhand": "Rund sköld",
+      "intendedUse": "Spelbar hjälte",
+      "category": "KayKit Adventurers",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-adventurers",
+      "license": "CC0 1.0 (License.txt i KayKit_Adventurers_2.0_FREE, kontrollerad 2026-10-14); animationer: KayKit Character Animations 1.1, CC0 1.0",
+      "attribution": null,
+      "originalFormat": "GLB/glTF",
+      "convertedFormat": "oförändrad GLB/glTF",
+      "rig": "Rig_Medium",
+      "animations": [
+        "characters/kaykit-animations/Rig_Medium_General.glb",
+        "characters/kaykit-animations/Rig_Medium_MovementBasic.glb",
+        "characters/kaykit-animations/Rig_Medium_CombatMelee.glb",
+        "characters/kaykit-animations/Rig_Medium_Special.glb"
+      ],
+      "clipMap": {
+        "attack": "Melee_1H_Attack_Chop",
+        "spellcast": "Use_Item"
+      },
+      "substitutes": [
+        "spellcast"
+      ],
+      "weapons": {
+        "Svärd": "characters/kaykit-adventurers/weapons/sword_1handed.gltf",
+        "Yxa": "characters/kaykit-adventurers/weapons/axe_1handed.gltf",
+        "Dolk": "characters/kaykit-adventurers/weapons/dagger.gltf",
+        "Stav": "characters/kaykit-adventurers/weapons/staff.gltf",
+        "Trollstav": "characters/kaykit-adventurers/weapons/wand.gltf",
+        "Båge": "characters/kaykit-adventurers/weapons/bow_withString.gltf"
+      },
+      "offhand": {
+        "Rund sköld": "characters/kaykit-adventurers/weapons/shield_round.gltf",
+        "Vapensköld": "characters/kaykit-adventurers/weapons/shield_badge_color.gltf"
+      }
+    },
+    {
+      "id": "kaykit-mage",
+      "name": "Magiker",
+      "file": "characters/kaykit-adventurers/Mage.glb",
+      "defaultWeapon": "Stav",
+      "defaultOffhand": null,
+      "intendedUse": "Spelbar hjälte",
+      "category": "KayKit Adventurers",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-adventurers",
+      "license": "CC0 1.0 (License.txt i KayKit_Adventurers_2.0_FREE, kontrollerad 2026-10-14); animationer: KayKit Character Animations 1.1, CC0 1.0",
+      "attribution": null,
+      "originalFormat": "GLB/glTF",
+      "convertedFormat": "oförändrad GLB/glTF",
+      "rig": "Rig_Medium",
+      "animations": [
+        "characters/kaykit-animations/Rig_Medium_General.glb",
+        "characters/kaykit-animations/Rig_Medium_MovementBasic.glb",
+        "characters/kaykit-animations/Rig_Medium_CombatMelee.glb",
+        "characters/kaykit-animations/Rig_Medium_Special.glb"
+      ],
+      "clipMap": {
+        "attack": "Melee_1H_Attack_Chop",
+        "spellcast": "Use_Item"
+      },
+      "substitutes": [
+        "spellcast"
+      ],
+      "weapons": {
+        "Svärd": "characters/kaykit-adventurers/weapons/sword_1handed.gltf",
+        "Yxa": "characters/kaykit-adventurers/weapons/axe_1handed.gltf",
+        "Dolk": "characters/kaykit-adventurers/weapons/dagger.gltf",
+        "Stav": "characters/kaykit-adventurers/weapons/staff.gltf",
+        "Trollstav": "characters/kaykit-adventurers/weapons/wand.gltf",
+        "Båge": "characters/kaykit-adventurers/weapons/bow_withString.gltf"
+      },
+      "offhand": {
+        "Rund sköld": "characters/kaykit-adventurers/weapons/shield_round.gltf",
+        "Vapensköld": "characters/kaykit-adventurers/weapons/shield_badge_color.gltf"
+      }
+    },
+    {
+      "id": "kaykit-rogue",
+      "name": "Rogue",
+      "file": "characters/kaykit-adventurers/Rogue.glb",
+      "defaultWeapon": "Dolk",
+      "defaultOffhand": null,
+      "intendedUse": "Spelbar hjälte",
+      "category": "KayKit Adventurers",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-adventurers",
+      "license": "CC0 1.0 (License.txt i KayKit_Adventurers_2.0_FREE, kontrollerad 2026-10-14); animationer: KayKit Character Animations 1.1, CC0 1.0",
+      "attribution": null,
+      "originalFormat": "GLB/glTF",
+      "convertedFormat": "oförändrad GLB/glTF",
+      "rig": "Rig_Medium",
+      "animations": [
+        "characters/kaykit-animations/Rig_Medium_General.glb",
+        "characters/kaykit-animations/Rig_Medium_MovementBasic.glb",
+        "characters/kaykit-animations/Rig_Medium_CombatMelee.glb",
+        "characters/kaykit-animations/Rig_Medium_Special.glb"
+      ],
+      "clipMap": {
+        "attack": "Melee_1H_Attack_Chop",
+        "spellcast": "Use_Item"
+      },
+      "substitutes": [
+        "spellcast"
+      ],
+      "weapons": {
+        "Svärd": "characters/kaykit-adventurers/weapons/sword_1handed.gltf",
+        "Yxa": "characters/kaykit-adventurers/weapons/axe_1handed.gltf",
+        "Dolk": "characters/kaykit-adventurers/weapons/dagger.gltf",
+        "Stav": "characters/kaykit-adventurers/weapons/staff.gltf",
+        "Trollstav": "characters/kaykit-adventurers/weapons/wand.gltf",
+        "Båge": "characters/kaykit-adventurers/weapons/bow_withString.gltf"
+      },
+      "offhand": {
+        "Rund sköld": "characters/kaykit-adventurers/weapons/shield_round.gltf",
+        "Vapensköld": "characters/kaykit-adventurers/weapons/shield_badge_color.gltf"
+      }
+    },
+    {
+      "id": "kaykit-rogue-hooded",
+      "name": "Rogue med huva",
+      "file": "characters/kaykit-adventurers/Rogue_Hooded.glb",
+      "defaultWeapon": "Dolk",
+      "defaultOffhand": null,
+      "intendedUse": "Spelbar hjälte",
+      "category": "KayKit Adventurers",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-adventurers",
+      "license": "CC0 1.0 (License.txt i KayKit_Adventurers_2.0_FREE, kontrollerad 2026-10-14); animationer: KayKit Character Animations 1.1, CC0 1.0",
+      "attribution": null,
+      "originalFormat": "GLB/glTF",
+      "convertedFormat": "oförändrad GLB/glTF",
+      "rig": "Rig_Medium",
+      "animations": [
+        "characters/kaykit-animations/Rig_Medium_General.glb",
+        "characters/kaykit-animations/Rig_Medium_MovementBasic.glb",
+        "characters/kaykit-animations/Rig_Medium_CombatMelee.glb",
+        "characters/kaykit-animations/Rig_Medium_Special.glb"
+      ],
+      "clipMap": {
+        "attack": "Melee_1H_Attack_Chop",
+        "spellcast": "Use_Item"
+      },
+      "substitutes": [
+        "spellcast"
+      ],
+      "weapons": {
+        "Svärd": "characters/kaykit-adventurers/weapons/sword_1handed.gltf",
+        "Yxa": "characters/kaykit-adventurers/weapons/axe_1handed.gltf",
+        "Dolk": "characters/kaykit-adventurers/weapons/dagger.gltf",
+        "Stav": "characters/kaykit-adventurers/weapons/staff.gltf",
+        "Trollstav": "characters/kaykit-adventurers/weapons/wand.gltf",
+        "Båge": "characters/kaykit-adventurers/weapons/bow_withString.gltf"
+      },
+      "offhand": {
+        "Rund sköld": "characters/kaykit-adventurers/weapons/shield_round.gltf",
+        "Vapensköld": "characters/kaykit-adventurers/weapons/shield_badge_color.gltf"
+      }
+    },
+    {
+      "id": "kaykit-ranger",
+      "name": "Ranger",
+      "file": "characters/kaykit-adventurers/Ranger.glb",
+      "defaultWeapon": "Båge",
+      "defaultOffhand": null,
+      "intendedUse": "Spelbar hjälte",
+      "category": "KayKit Adventurers",
+      "creator": "Kay Lousberg",
+      "source": "https://kaylousberg.itch.io/kaykit-adventurers",
+      "license": "CC0 1.0 (License.txt i KayKit_Adventurers_2.0_FREE, kontrollerad 2026-10-14); animationer: KayKit Character Animations 1.1, CC0 1.0",
+      "attribution": null,
+      "originalFormat": "GLB/glTF",
+      "convertedFormat": "oförändrad GLB/glTF",
+      "rig": "Rig_Medium",
+      "animations": [
+        "characters/kaykit-animations/Rig_Medium_General.glb",
+        "characters/kaykit-animations/Rig_Medium_MovementBasic.glb",
+        "characters/kaykit-animations/Rig_Medium_CombatMelee.glb",
+        "characters/kaykit-animations/Rig_Medium_Special.glb"
+      ],
+      "clipMap": {
+        "attack": "Melee_1H_Attack_Chop",
+        "spellcast": "Use_Item"
+      },
+      "substitutes": [
+        "spellcast"
+      ],
+      "weapons": {
+        "Svärd": "characters/kaykit-adventurers/weapons/sword_1handed.gltf",
+        "Yxa": "characters/kaykit-adventurers/weapons/axe_1handed.gltf",
+        "Dolk": "characters/kaykit-adventurers/weapons/dagger.gltf",
+        "Stav": "characters/kaykit-adventurers/weapons/staff.gltf",
+        "Trollstav": "characters/kaykit-adventurers/weapons/wand.gltf",
+        "Båge": "characters/kaykit-adventurers/weapons/bow_withString.gltf"
+      },
+      "offhand": {
+        "Rund sköld": "characters/kaykit-adventurers/weapons/shield_round.gltf",
+        "Vapensköld": "characters/kaykit-adventurers/weapons/shield_badge_color.gltf"
+      }
+    },
     {
       "id": "kaykit-skeleton-warrior",
       "name": "Skelettkrigare",
@@ -20,15 +869,19 @@
       "convertedFormat": "oförändrad GLB/glTF",
       "rig": "Rig_Medium",
       "animations": [
-        "characters/kaykit-skeletons/Rig_Medium_General.glb",
-        "characters/kaykit-skeletons/Rig_Medium_MovementBasic.glb"
+        "characters/kaykit-animations/Rig_Medium_General.glb",
+        "characters/kaykit-animations/Rig_Medium_MovementBasic.glb",
+        "characters/kaykit-animations/Rig_Medium_CombatMelee.glb",
+        "characters/kaykit-animations/Rig_Medium_Special.glb"
       ],
       "clipMap": {
-        "attack": "Throw",
+        "idle": "Skeletons_Idle",
+        "walk": "Skeletons_Walking",
+        "attack": "Melee_1H_Attack_Chop",
+        "death": "Skeletons_Death",
         "spellcast": "Use_Item"
       },
       "substitutes": [
-        "attack",
         "spellcast"
       ],
       "weapons": {
@@ -58,15 +911,19 @@
       "convertedFormat": "oförändrad GLB/glTF",
       "rig": "Rig_Medium",
       "animations": [
-        "characters/kaykit-skeletons/Rig_Medium_General.glb",
-        "characters/kaykit-skeletons/Rig_Medium_MovementBasic.glb"
+        "characters/kaykit-animations/Rig_Medium_General.glb",
+        "characters/kaykit-animations/Rig_Medium_MovementBasic.glb",
+        "characters/kaykit-animations/Rig_Medium_CombatMelee.glb",
+        "characters/kaykit-animations/Rig_Medium_Special.glb"
       ],
       "clipMap": {
-        "attack": "Throw",
+        "idle": "Skeletons_Idle",
+        "walk": "Skeletons_Walking",
+        "attack": "Melee_1H_Attack_Chop",
+        "death": "Skeletons_Death",
         "spellcast": "Use_Item"
       },
       "substitutes": [
-        "attack",
         "spellcast"
       ],
       "weapons": {
@@ -96,15 +953,19 @@
       "convertedFormat": "oförändrad GLB/glTF",
       "rig": "Rig_Medium",
       "animations": [
-        "characters/kaykit-skeletons/Rig_Medium_General.glb",
-        "characters/kaykit-skeletons/Rig_Medium_MovementBasic.glb"
+        "characters/kaykit-animations/Rig_Medium_General.glb",
+        "characters/kaykit-animations/Rig_Medium_MovementBasic.glb",
+        "characters/kaykit-animations/Rig_Medium_CombatMelee.glb",
+        "characters/kaykit-animations/Rig_Medium_Special.glb"
       ],
       "clipMap": {
-        "attack": "Throw",
+        "idle": "Skeletons_Idle",
+        "walk": "Skeletons_Walking",
+        "attack": "Melee_1H_Attack_Chop",
+        "death": "Skeletons_Death",
         "spellcast": "Use_Item"
       },
       "substitutes": [
-        "attack",
         "spellcast"
       ],
       "weapons": {
@@ -134,15 +995,19 @@
       "convertedFormat": "oförändrad GLB/glTF",
       "rig": "Rig_Medium",
       "animations": [
-        "characters/kaykit-skeletons/Rig_Medium_General.glb",
-        "characters/kaykit-skeletons/Rig_Medium_MovementBasic.glb"
+        "characters/kaykit-animations/Rig_Medium_General.glb",
+        "characters/kaykit-animations/Rig_Medium_MovementBasic.glb",
+        "characters/kaykit-animations/Rig_Medium_CombatMelee.glb",
+        "characters/kaykit-animations/Rig_Medium_Special.glb"
       ],
       "clipMap": {
-        "attack": "Throw",
+        "idle": "Skeletons_Idle",
+        "walk": "Skeletons_Walking",
+        "attack": "Melee_1H_Attack_Chop",
+        "death": "Skeletons_Death",
         "spellcast": "Use_Item"
       },
       "substitutes": [
-        "attack",
         "spellcast"
       ],
       "weapons": {
