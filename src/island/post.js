@@ -60,7 +60,7 @@ class GodRaysPass extends Pass {
   }
 
   setSize(w, h) {
-    this.occRT.setSize(Math.max(1, Math.floor(w / 2)), Math.max(1, Math.floor(h / 2)));
+    this.occRT.setSize(Math.max(1, Math.floor(w / 4)), Math.max(1, Math.floor(h / 4)));
     this.material.uniforms.uAspect.value = w / h;
   }
 
@@ -132,6 +132,10 @@ export function createPost(renderer, scene, camera, { hideForAO, hideForRays }) 
   gtao.updateGtaoMaterial({ radius: 1.2, distanceExponent: 1.5, thickness: 1.5, scale: 1.2, samples: 16 });
   gtao.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 6, rings: 2, samples: 16 });
   gtao.blendIntensity = 0.85;
+  gtao.enabled = false; // tung; slås på i kvalitetsnivån Ultra
+  // AO i halv upplösning: mjuk effekt där full upplösning inte syns men kostar mycket.
+  const gtaoSetSize = gtao.setSize.bind(gtao);
+  gtao.setSize = (w, h) => gtaoSetSize(Math.max(1, Math.floor(w / 2)), Math.max(1, Math.floor(h / 2)));
   // Dölj objekt som inte passar AO-passets egna material (förskjutna i shadern eller genomskinliga).
   const gtaoRender = gtao.render.bind(gtao);
   gtao.render = (...args) => {

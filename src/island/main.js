@@ -43,13 +43,14 @@ const globals = {
 
 async function main() {
   const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+  renderer.setPixelRatio(1);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.9;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
   renderer.shadowMap.autoUpdate = false;
+  renderer.info.autoReset = false; // summera alla pass i en bildruta
   document.getElementById('app').appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
@@ -88,12 +89,12 @@ async function main() {
   // Ljus: sol/måne med skuggor som följer spelaren, plus fyllnadsljus för natt och blixtar.
   const sun = new THREE.DirectionalLight(0xffffff, 3);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(4096, 4096);
+  sun.shadow.mapSize.set(2048, 2048);
   const sc = sun.shadow.camera;
-  sc.left = -65;
-  sc.right = 65;
-  sc.top = 65;
-  sc.bottom = -65;
+  sc.left = -55;
+  sc.right = 55;
+  sc.top = 55;
+  sc.bottom = -55;
   sc.near = 1;
   sc.far = 450;
   sun.shadow.bias = -0.0004;
@@ -121,7 +122,8 @@ async function main() {
     timeSpeed: 0,
     exposure: 0.9,
     grass: true,
-    pixelRatio: Math.min(window.devicePixelRatio, 1.5),
+    pixelRatio: 1,
+    quality: 'Hög',
   };
 
   const post = createPost(renderer, scene, camera, {
@@ -266,7 +268,35 @@ async function main() {
     globals.uWindDir.value.set(Math.cos(a), Math.sin(a));
   });
   fWind.add(globals.uWindStrength, 'value', 0, 2, 0.01).name('styrka');
+  // Kvalitetsnivåer: de dyraste delarna är himmel/moln per pixel, upplösning, AO och skuggor.
+  const QUALITY = {
+    Ultra: { pr: Math.min(window.devicePixelRatio, 1.5), mode: 'physical', sky: 0.6, steps: 56, ao: true, rays: 0.55, shadow: 4096, grass: 1 },
+    Hög: { pr: 1, mode: 'stylized', sky: 0.5, steps: 40, ao: false, rays: 0.55, shadow: 2048, grass: 1 },
+    Medel: { pr: 1, mode: 'stylized', sky: 0.4, steps: 32, ao: false, rays: 0.55, shadow: 2048, grass: 0.6 },
+    Låg: { pr: 0.75, mode: 'stylized', sky: 0.33, steps: 20, ao: false, rays: 0, shadow: 1024, grass: 0.35 },
+  };
+  const grassTotal = veg.grass.mesh.geometry.instanceCount;
+  function applyQuality(name) {
+    const q = QUALITY[name];
+    settings.pixelRatio = q.pr;
+    renderer.setPixelRatio(q.pr);
+    sky.quality.scale = q.sky;
+    sky.setMode(q.mode);
+    lastEnv.cov = -1; // rendera om reflektionerna med den nya himlen
+    sky.uniforms.uCloudSteps.value = q.steps;
+    post.gtao.enabled = q.ao;
+    post.settings.rays = q.rays;
+    if (sun.shadow.mapSize.x !== q.shadow) {
+      sun.shadow.mapSize.set(q.shadow, q.shadow);
+      sun.shadow.map?.dispose();
+      sun.shadow.map = null;
+    }
+    veg.grass.mesh.geometry.instanceCount = Math.floor(grassTotal * q.grass);
+    onResize();
+    gui.controllersRecursive().forEach((c) => c.updateDisplay());
+  }
   const fGfx = gui.addFolder('Grafik');
+  fGfx.add(settings, 'quality', Object.keys(QUALITY)).name('kvalitet').onChange(applyQuality);
   fGfx
     .add(settings, 'pixelRatio', 0.5, 2, 0.05)
     .name('renderupplösning')
@@ -274,6 +304,14 @@ async function main() {
       renderer.setPixelRatio(v);
       onResize();
     });
+  fGfx
+    .add(sky.mode, 'value', { stiliserad: 'stylized', fysikalisk: 'physical' })
+    .name('himmel och moln')
+    .onChange((m) => {
+      sky.setMode(m);
+      lastEnv.cov = -1;
+    });
+  fGfx.add(sky.quality, 'scale', 0.25, 1, 0.05).name('himmelsupplösning').onFinishChange(() => sky.resize());
   fGfx.add(sky.uniforms.uCloudsOn, 'value', { på: 1, av: 0 }).name('volymetriska moln');
   fGfx.add(sky.uniforms.uCloudSteps, 'value', 16, 96, 1).name('molnsteg');
   fGfx.add(post.gtao, 'enabled').name('GTAO');
@@ -295,15 +333,21 @@ async function main() {
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     post.setSize(w, h);
+    const buf = renderer.getDrawingBufferSize(new THREE.Vector2());
+    sky.setSize(buf.x, buf.y);
   }
   window.addEventListener('resize', onResize);
+  onResize();
 
   // Kompilera en shader i taget, så att laddningsskärmen hinner visa framsteg mellan varje.
   // En shader som kompileras synkront blockerar huvudtråden, så räknaren står still under just den.
   player.update(0, 0);
   controls.update();
   camera.updateMatrixWorld();
-  const jobs = [{ label: 'himmel för reflektioner', run: () => updateSky(true) }];
+  const jobs = [
+    { label: 'himmel för reflektioner', run: () => updateSky(true) },
+    { label: 'himmel och moln', run: () => sky.render(renderer, camera) },
+  ];
   const seen = new Set();
   scene.traverse((obj) => {
     if (!obj.material) return;
@@ -374,17 +418,22 @@ async function main() {
     post.update(sunDir, sunTrans, daylight, sky.uniforms.uCoverage.value);
     post.grade.uniforms.uFlash.value = globals.uFlash.value;
 
+    renderer.info.reset();
+    sky.render(renderer, camera);
     renderer.shadowMap.needsUpdate = true;
     post.composer.render(dt);
 
+    // Verklig tid (dt är begränsad för simuleringen och kan inte användas för fps).
     frames++;
-    fpsTime += dt;
-    if (fpsTime > 0.5) {
+    const now = performance.now();
+    if (now - fpsTime > 500) {
+      const ms = (now - fpsTime) / frames;
       const hh = Math.floor(settings.time);
       const mm = Math.floor((settings.time % 1) * 60);
-      stats.textContent = `${Math.round(frames / fpsTime)} fps · ${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+      const info = renderer.info.render;
+      stats.textContent = `${Math.round(1000 / ms)} fps (${ms.toFixed(1)} ms) · ${(info.triangles / 1e6).toFixed(1)} M tri · ${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
       frames = 0;
-      fpsTime = 0;
+      fpsTime = now;
     }
   }
 

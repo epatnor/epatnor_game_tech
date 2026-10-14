@@ -355,7 +355,7 @@ class Occupancy {
 }
 
 function createGrass(globals, count = 170000, R = 44) {
-  const levels = 5;
+  const levels = 3; // 5 trianglar per strå
   const pos = [];
   for (let k = 0; k < levels; k++) {
     const y = k / levels;
@@ -611,12 +611,20 @@ export function createVegetation(globals, terrain, reserved) {
   const s = new THREE.Vector3();
   const col = new THREE.Color();
 
+  // Instanserna delas upp på varianter och sedan på rutor om CHUNK meter. En enda stor
+  // InstancedMesh kan aldrig sorteras bort, men en ruta utanför kamerans (eller skuggkamerans)
+  // synfält hoppas över helt.
+  const CHUNK = 64;
   function instanced(geos, material, depth, points, opts) {
-    const per = Math.ceil(points.length / geos.length);
-    geos.forEach((geo, gi) => {
-      const pts = points.slice(gi * per, (gi + 1) * per);
-      if (!pts.length) return;
-      const mesh = new THREE.InstancedMesh(geo, material, pts.length);
+    const buckets = new Map();
+    points.forEach((p, i) => {
+      const gi = i % geos.length;
+      const key = `${gi}:${Math.floor(p.x / CHUNK)},${Math.floor(p.z / CHUNK)}`;
+      if (!buckets.has(key)) buckets.set(key, { gi, pts: [] });
+      buckets.get(key).pts.push(p);
+    });
+    for (const { gi, pts } of buckets.values()) {
+      const mesh = new THREE.InstancedMesh(geos[gi], material, pts.length);
       pts.forEach((p, i) => {
         const sc = opts.scale(p);
         e.set((rng() - 0.5) * opts.tilt, opts.yaw ? opts.yaw(p) : rng() * Math.PI * 2, (rng() - 0.5) * opts.tilt);
@@ -629,12 +637,12 @@ export function createVegetation(globals, terrain, reserved) {
         mesh.setColorAt(i, col.setRGB(b, b, b));
         if (opts.collide) colliders.push({ x: p.x, z: p.z, r: opts.collide * sc });
       });
-      mesh.castShadow = true;
+      mesh.castShadow = opts.castShadow !== false;
       mesh.receiveShadow = true;
       if (depth) mesh.customDepthMaterial = depth;
       mesh.computeBoundingSphere();
       group.add(mesh);
-    });
+    }
   }
 
   // Lövträd: tre gröna varianter och en höstvariant.
@@ -707,7 +715,7 @@ export function createVegetation(globals, terrain, reserved) {
     bushMat,
     bushDepth,
     bushPts,
-    { scale: () => 0.7 + rng() * 0.6, tilt: 0.1, sink: 0.1 },
+    { scale: () => 0.7 + rng() * 0.6, tilt: 0.1, sink: 0.1, castShadow: false },
   );
 
   const rockMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, flatShading: true, name: 'stenar' });
